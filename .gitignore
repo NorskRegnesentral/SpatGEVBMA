@@ -1,0 +1,28 @@
+# History files
+.Rhistory
+.Rapp.history
+*.Rbuildignore
+
+callgrind.*
+*.out
+
+# Local data backup
+.RData
+
+# Example code in package build process
+*-Ex.R
+
+# RStudio files
+.Rproj.user/
+.Rproj.user
+
+# produced vignettes
+vignettes/*.html
+vignettes/*.pdf
+
+# temporary backup files
+*~
+
+# compiled C files
+src/*.o
+src/*.so

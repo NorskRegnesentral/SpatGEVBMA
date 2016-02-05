@@ -1,0 +1,5 @@
+exportPattern("^[[:alpha:]]+")
+
+import(SpatialExtremes,msm,coda)
+
+useDynLib(SpatialGEVBMA)
