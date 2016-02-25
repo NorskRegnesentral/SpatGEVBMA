@@ -3,10 +3,15 @@ rm(list = ls())
 library(SpatialGEVBMA)
 library(parallel)
 
-data(norway)
-load("cov.RData")
-load("~/Local/Anita/gev.output.bma.20130423.RData")
+setwd("~/NR/SpatGEV/")
 
+data(norway)
+
+mc.cores <- 16
+
+load("./inputs/cov.RData")
+
+load("./output/gev.output.bma.RData")
 
 get.sigma.22.inv <- function(R, burn=NULL, odens=1e3)
   {
@@ -112,7 +117,7 @@ ww.na <- which(apply(is.na(cov),1,"any"))
 cov <- cov[-ww.na,]
                
 ## Can we leave this at "long story"
-X.orig <- as.matrix(read.delim("./mc.dsgn.mat.txt",sep=" "))
+X.orig <- as.matrix(read.delim("./inputs/mc.dsgn.mat.txt",sep=" "))
 mu.orig <- colMeans(X.orig, na.rm=TRUE)
 sd.orig <- sqrt(diag(var(X.orig)))
                 
@@ -138,6 +143,6 @@ helper <- function(i)
 
 N <- dim(cov.map)[1]
 
-l <- mclapply(1:N, "helper", mc.cores = 22, mc.silent=FALSE)
+l <- mclapply(1:N, "helper", mc.cores = mc.cores, mc.silent=FALSE)
 Z.p <- matrix(unlist(l),ncol=3,byrow=TRUE)
-save(l, file="returns.20140513.RData")
+save(l, file="./output/returns.RData")
