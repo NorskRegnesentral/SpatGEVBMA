@@ -11,7 +11,7 @@ Version: 1.0
 
 Date: 2014-03-11
 
-Author: Alex Lenkoski, Martin Jullum
+Author: Martin Jullum, Alex Lenkoski, Gunnhildur Steinbakk
 
 Depends: SpatialExtremes,msm,coda,Rcpp
 
