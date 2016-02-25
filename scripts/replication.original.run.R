@@ -32,7 +32,7 @@ prior$mu$beta.0 <- c(8,rep(0, p-1))
 ##prior$xi$Omega.0 <- diag(p)##solve(diag(c(100,rep(100,dim(X.all)[2] - 1))))
 
 
-n.reps <- 2e3
+n.reps <- 2e5
 
 R <- spatial.gev.bma(Y, X, S, n.reps, prior, print.every = 1e3)
 
