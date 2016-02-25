@@ -26,3 +26,6 @@ vignettes/*.pdf
 # compiled C files
 src/*.o
 src/*.so
+
+# rout files
+*.Rout
