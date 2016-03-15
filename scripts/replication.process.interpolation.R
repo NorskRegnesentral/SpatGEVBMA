@@ -1,7 +1,13 @@
 rm(list = ls())
 
-load("returns.RData")
-load("cov.RData")
+library(SpatialGEVBMA)
+library(ncdf4io)
+
+setwd("~/NR/SpatGEV/")
+
+load("./output/returns.RData")
+
+load("./inputs/cov.RData")
 
 Z.p <- matrix(unlist(l),ncol=3,byrow=TRUE)
 w.na <- which(apply(is.na(cov),1,"any"))
@@ -11,6 +17,8 @@ Z[w.na,] <- cbind(cov[w.na,2:1], rbind(colMeans(Z.p),colMeans(Z.p)))
 
 colnames(Z) <- c("lon","lat", .025,.5,.975)
 rownames(Z) <- NULL
+
+
 write.csv(Z, file="map.txt",row.names=FALSE)
 ##this all needs to be ncdf4.
 
