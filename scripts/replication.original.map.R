@@ -9,7 +9,7 @@ data(norway)
 
 mc.cores <- 16
 
-load("./inputs/cov.RData")
+load("./inputs/cov.RData")  ## This needs be a direct link to netcdf, in some manner
 
 load("./output/gev.output.bma.RData")
 

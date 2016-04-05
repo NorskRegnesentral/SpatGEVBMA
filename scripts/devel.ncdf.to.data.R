@@ -27,18 +27,6 @@ for(i in 1:length(l.all))
     image(a[[i]]$x,a[[i]]$y,a[[i]]$z,main=nm[i])
   }
 
-##---- Sample some points ------
-w <- which(!is.na(a[[i]]$z))
-p <- NULL
-while(length(p) < 69 * 2)
-  {
-    x <- sample(1:length(a[[i]]$x),1)
-    y <- sample(1:length(a[[i]]$y),1)
-    if(!is.na(a[[i]]$z[x,y]))
-      {
-        p <- rbind(p,c(x,y))
-      }
-  }
-                
 
 
+##combine and save as cov.RData

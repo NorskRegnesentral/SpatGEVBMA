@@ -20,7 +20,7 @@ rownames(Z) <- NULL
 
 
 write.csv(Z, file="map.txt",row.names=FALSE)
-##this all needs to be ncdf4.
+ ##this all needs to be ncdf4.
 
 
 
