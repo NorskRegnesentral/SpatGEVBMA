@@ -1226,7 +1226,7 @@ gev.impute <- function(R,X.drop, S.drop, burn = NULL, n.each = NULL,return.param
 
 spatial.gev.bma <- function(Y.list, X.all,S,n.reps,prior.user= NULL, full = FALSE, fixed.xi = NULL, print.every=0,nonspatial=FALSE,log.kappa=FALSE)
   {
-    print("THIS IS THE NEW VERSION OF SpatialGEVBMA")
+    #print("THIS IS THE NEW VERSION OF SpatialGEVBMA")
     G <- gev.init(Y.list,X.all,S, prior.user,full,fixed.xi,nonspatial, log.kappa)
     R <- gev.results.init(length(Y.list), dim(X.all)[2], n.reps)
     R$S <- S
@@ -1236,7 +1236,7 @@ spatial.gev.bma <- function(Y.list, X.all,S,n.reps,prior.user= NULL, full = FALS
     
     for(i in 1:n.reps)
       {
-        if( (print.every >0) && (i %% print.every == 0))print(paste("On Interation", i))
+        if( (print.every >0) && (i %% print.every == 0))print(paste("MCMC: On Iteration", i))
         G <- gev.update(G)
         R$THETA[i,,1] <- G$theta.mu
         if(R$log.kappa)

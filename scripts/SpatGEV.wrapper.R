@@ -18,9 +18,10 @@ library(fields)
 ### TO DO:
 
 ## Bugs/quality control
-# Check/ask Alex what causes the difference in indX and ncnc$dim$X$vals. What is done in nc4.matrix just seems wrong...
-# Find the source of the very large return values we get, there ought to be something wrong there.
-# Determine if the posterior is correctly written to the nc-file
+#X Check/ask Alex what causes the difference in indX and ncnc$dim$X$vals. What is done in nc4.matrix just seems wrong...
+#X Find the source of the very large return values we get, there ought to be something wrong there.
+#X What is wrong with the function I am running?
+# Ensure that the posterior is correctly written to the nc-file
 # Test the procedure on the norway-data (?)
 
 ## Features:
@@ -28,34 +29,141 @@ library(fields)
 #X Write basic IQR figure to file
 # Document input variables
 # Document the form of the input files
-# Ensure output is written correctly
+
+# For simplicity setting default values here (to be removed)
 
 
+get.sigma.22.inv <- function(R, burn=NULL, odens=1e3)
+{
+  n.s <- dim(R$S)[1]
+  reps <- dim(R$THETA)[1]
+  if (is.null(burn)) burn <- round(reps/10)
+  I <- round(seq(burn+1, reps, length=odens))
+  sigma.22.inv <- array(dim = c(n.s,n.s,3,length(I)))
+  D.S <- make.D(R$S, R$S)
+  for (i in 1:length(I))
+  {
+    #print(i)
+    it <- I[i]
+    for(k in 1:3)
+    {
+      alpha <- R$ALPHA[it, k]
+      lambda <- R$LAMBDA[it, k]
+      C <- 1/alpha * exp(-D.S/lambda)
+      diag(C) <- diag(C) + 1e-05
+      sigma.22.inv[,,k,i] <- solve(C)
+    }
+  }
+  return(sigma.22.inv)
+}
+
+get.sigma.22.inv.tau <- function(R, sigma.22.inv, burn=NULL, odens=1e3)
+{
+  n.s <- dim(R$S)[1]
+  reps <- dim(R$THETA)[1]
+  if (is.null(burn)) burn <- round(reps/10)
+  I <- round(seq(burn+1, reps, length=odens))
+  sigma.22.inv.tau <- array(dim = c(n.s,3,length(I)))
+  for(i in 1:length(I))
+  {
+    #print(i)
+    it <- I[i]
+    for(k in 1:3)
+    {
+      sigma.22.inv.tau[,k,i] <- sigma.22.inv[,,k,i] %*% R$TAU[it,,k]
+    }
+  }
+  return(sigma.22.inv.tau)
+}
+
+gev.impute.params <- function (R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau, burn = NULL, odens=1e3) 
+{
+  reps <- dim(R$THETA)[1]
+  if (is.null(burn)) burn <- round(reps/10)
+  I <- round(seq(burn+1, reps, length=odens))
+  P <- matrix(0, length(I), 3)
+  D.drop <- make.D(S.drop, R$S)
+  MU <- R$THETA[I,,1] %*% X.drop
+  KAPPA <- R$THETA[I,,2] %*% X.drop
+  XI <- R$THETA[I,,3] %*% X.drop
+  for (i in 1:length(I))
+  {
+    it <- I[i]
+    alpha <- R$ALPHA[it, 1]
+    lambda <- R$LAMBDA[it, 1]
+    sigma.11 <- 1/alpha
+    sigma.12 <- 1/alpha * exp(-D.drop/lambda)
+    tau.hat <- sigma.12 %*% sigma.22.inv.tau[,1,i]
+    varsigma <- sigma.11 - sigma.12 %*% sigma.22.inv[,,1,i] %*% t(sigma.12)
+    tau.new <- rnorm(1, tau.hat, sd = sqrt(varsigma))
+    
+    mu.s <- MU[i] + tau.new
+    
+    alpha <- R$ALPHA[it, 2]
+    lambda <- R$LAMBDA[it, 2]
+    
+    sigma.11 <- 1/alpha
+    sigma.12 <- 1/alpha * exp(-D.drop/lambda)
+    tau.hat <- sigma.12 %*% sigma.22.inv.tau[,2,i]
+    varsigma <- sigma.11 - sigma.12 %*% sigma.22.inv[,,2,i] %*% t(sigma.12)
+    tau.new <- rnorm(1, tau.hat, sd = sqrt(varsigma))
+    
+    kappa.hat <- KAPPA[i]
+    kappa.s <- rtnorm(1, kappa.hat + tau.hat, sd = sqrt(varsigma),lower = 0)
+    
+    alpha <- R$ALPHA[it, 3]
+    lambda <- R$LAMBDA[it, 3]
+    
+    sigma.11 <- 1/alpha
+    sigma.12 <- 1/alpha * exp(-D.drop/lambda)
+    tau.hat <- sigma.12 %*% sigma.22.inv.tau[,3,i]
+    varsigma <- sigma.11 - sigma.12 %*% sigma.22.inv[,,3,i] %*% t(sigma.12)
+    tau.new <- rnorm(1, tau.hat, sd = sqrt(varsigma))
+    
+    xi.s <- XI[i] + tau.new
+    
+    P[i,] <- c(mu.s, kappa.s, xi.s)
+  }
+  return(P)
+}
+
+imputation.func <- function(i,cov.map,S.map,R,sigma.22.inv,sigma.22.inv.tau,return.period,all.post.quantiles)
+{
+  X.drop <- cov.map[i,]
+  S.drop <- S.map[i,,drop=FALSE]
+  P <- gev.impute.params(R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau)
+  z <- gev.z.p(1/return.period, P[,1], 1/P[,2], P[,3])
+  if(i %% 10 == 0)print(paste("Finished",i))
+  return(quantile(z, all.post.quantiles))
+}
+
+ff <- function(i,b){
+  i^2+b
+}
+
+test <- function(a)
+{
+  b=2
+  N=100
+  unlist(mclapply(1:N,"ff",mc.cores=3,mc.silent=FALSE,b=b))
+}
+
+#test(1)
 
 
-SpatGEV.wrapper <- function(covariates.folder, station.returns.file, station.returns.sheet, station.locations.file, output.location, output.folder.name, keep.temp.files,
-                            mcmc.reps,cores, post.quantiles, uncertainty.plot, testing,
-                            returns.name = NULL){
-
-  # For simplicity setting default values here (to be removed)
-  covariates.folder <- "~/NR/SpatGEV/inputs/nc_files_used"
-  station.returns.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
-  station.returns.sheet <- 1 # The sheet name or index containing the station returns to be read
-  station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
-  output.location <- "~/NR/SpatGEV"
-  output.folder.name <- "outputTemp2"
-  keep.temp.files <- TRUE
-  mcmc.reps <- 5*10^4 # Should at least be 10^4
-  cores <- 10 # 20 # The number of cores to be used for paralellization when mapping out the posterior to the grid
-  post.quantiles <- c(0.025,0.5,0.975)
-  uncertainty.plot <- TRUE
-  testing <- FALSE
-  returns.name <- NULL # If NULL then the name of specified sheet is used
+SpatGEV.wrapper <- function(covariates.folder, station.returns.file, station.returns.sheet, 
+                            station.locations.file, output.location, output.folder.name, 
+                            return.period, keep.temp.files, mcmc.reps,cores, post.quantiles, 
+                            uncertainty.plot, testing, returns.name = NULL, create.tempfiles){
   
   ### The actual function
 
   ## Various initial fixing
   {
+  # Bookeeping for storing intermediate results
+  initial.ls <- ls()  # To be used to subtract globally specified variables when saving intermediate variables
+  input.list <- names(formals(SpatGEV.wrapper)) # Want to keep the input variables
+    
   output.folder <- file.path(output.location,output.folder.name)
   output.temp.folder <- file.path(output.location,output.folder.name,"Temp")
 
@@ -79,153 +187,18 @@ SpatGEV.wrapper <- function(covariates.folder, station.returns.file, station.ret
     dir.create(output.temp.folder)
   }
   
+  if (create.tempfiles){
+    # Saving intermediate values to easily continue from here if bugs occurs
+    current.ls <- ls()
+    keep.var <- unique(c(current.ls[!(current.ls %in% initial.ls)],input.list))
+    save(list=keep.var,file=file.path(output.temp.folder,"temp_checkpoint_0.RData")) 
+    # Here we could delete variables which are not to be used below, to save RAM
   }
   
-  ## Help functions
-  {
-  getstr = function(mystring, initial.character="_", final.character="_")
-    {
-    # check that all 3 inputs are character variables
-    if (!is.character(mystring))
-    {
-      stop('The parent string must be a character variable.')
-    }
-    
-    if (!is.character(initial.character))
-    {
-      stop('The initial character must be a character variable.')
-    }
-    
-    
-    if (!is.character(final.character))
-    {
-      stop('The final character must be a character variable.')
-    }
-    
-    add=0
-    if(initial.character==final.character){add=1}
-    
-    # pre-allocate a vector to store the extracted strings
-    snippet = rep(0, length(mystring))
-    
-    for (i in 1:length(mystring))
-    {
-      # extract the initial position
-      initial.position = gregexpr(initial.character, mystring[i])[[1]][1] + 1
-      
-      # extract the final position
-      final.position = gregexpr(final.character, mystring[i])[[1]][1+add] - 1
-      
-      # extract the substring between the initial and final positions, inclusively
-      snippet[i] = substr(mystring[i], initial.position, final.position)
-    }
-    return(snippet)
+  cat("\nCheckpoint 0: Finished initialization.\n")
+  
   }
-    
-  get.sigma.22.inv <- function(R, burn=NULL, odens=1e3)
-    {
-      n.s <- dim(R$S)[1]
-      reps <- dim(R$THETA)[1]
-      if (is.null(burn)) burn <- round(reps/10)
-      I <- round(seq(burn+1, reps, length=odens))
-      sigma.22.inv <- array(dim = c(n.s,n.s,3,length(I)))
-      D.S <- make.D(R$S, R$S)
-      for (i in 1:length(I))
-      {
-        #print(i)
-        it <- I[i]
-        for(k in 1:3)
-        {
-          alpha <- R$ALPHA[it, k]
-          lambda <- R$LAMBDA[it, k]
-          C <- 1/alpha * exp(-D.S/lambda)
-          diag(C) <- diag(C) + 1e-05
-          sigma.22.inv[,,k,i] <- solve(C)
-        }
-      }
-      return(sigma.22.inv)
-    }
-    
-  get.sigma.22.inv.tau <- function(R, sigma.22.inv, burn=NULL, odens=1e3)
-    {
-      n.s <- dim(R$S)[1]
-      reps <- dim(R$THETA)[1]
-      if (is.null(burn)) burn <- round(reps/10)
-      I <- round(seq(burn+1, reps, length=odens))
-      sigma.22.inv.tau <- array(dim = c(n.s,3,length(I)))
-      for(i in 1:length(I))
-      {
-        #print(i)
-        it <- I[i]
-        for(k in 1:3)
-        {
-          sigma.22.inv.tau[,k,i] <- sigma.22.inv[,,k,i] %*% R$TAU[it,,k]
-        }
-      }
-      return(sigma.22.inv.tau)
-    }
-    
-  gev.impute.params <- function (R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau, burn = NULL, odens=1e3) 
-    {
-      reps <- dim(R$THETA)[1]
-      if (is.null(burn)) burn <- round(reps/10)
-      I <- round(seq(burn+1, reps, length=odens))
-      P <- matrix(0, length(I), 3)
-      D.drop <- make.D(S.drop, R$S)
-      MU <- R$THETA[I,,1] %*% X.drop
-      KAPPA <- R$THETA[I,,2] %*% X.drop
-      XI <- R$THETA[I,,3] %*% X.drop
-      for (i in 1:length(I))
-      {
-        it <- I[i]
-        alpha <- R$ALPHA[it, 1]
-        lambda <- R$LAMBDA[it, 1]
-        sigma.11 <- 1/alpha
-        sigma.12 <- 1/alpha * exp(-D.drop/lambda)
-        tau.hat <- sigma.12 %*% sigma.22.inv.tau[,1,i]
-        varsigma <- sigma.11 - sigma.12 %*% sigma.22.inv[,,1,i] %*% t(sigma.12)
-        tau.new <- rnorm(1, tau.hat, sd = sqrt(varsigma))
-        
-        mu.s <- MU[i] + tau.new
-        
-        alpha <- R$ALPHA[it, 2]
-        lambda <- R$LAMBDA[it, 2]
-        
-        sigma.11 <- 1/alpha
-        sigma.12 <- 1/alpha * exp(-D.drop/lambda)
-        tau.hat <- sigma.12 %*% sigma.22.inv.tau[,2,i]
-        varsigma <- sigma.11 - sigma.12 %*% sigma.22.inv[,,2,i] %*% t(sigma.12)
-        tau.new <- rnorm(1, tau.hat, sd = sqrt(varsigma))
-        
-        kappa.hat <- KAPPA[i]
-        kappa.s <- rtnorm(1, kappa.hat + tau.hat, sd = sqrt(varsigma),lower = 0)
-        
-        alpha <- R$ALPHA[it, 3]
-        lambda <- R$LAMBDA[it, 3]
-        
-        sigma.11 <- 1/alpha
-        sigma.12 <- 1/alpha * exp(-D.drop/lambda)
-        tau.hat <- sigma.12 %*% sigma.22.inv.tau[,3,i]
-        varsigma <- sigma.11 - sigma.12 %*% sigma.22.inv[,,3,i] %*% t(sigma.12)
-        tau.new <- rnorm(1, tau.hat, sd = sqrt(varsigma))
-        
-        xi.s <- XI[i] + tau.new
-        
-        P[i,] <- c(mu.s, kappa.s, xi.s)
-      }
-      return(P)
-    }
-
-  helper <- function(i)
-  {
-    X.drop <- cov.map[i,]
-    S.drop <- S.map[i,,drop=FALSE]
-    P <- gev.impute.params(R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau)
-    z <- gev.z.p(1/20, P[,1], 1/P[,2], P[,3])
-    if(i %% 10 == 0)print(paste("Finished",i))
-    return(quantile(z, all.post.quantiles))
-  }
-  }  
+  # Checkpoint 0
     
   ## Reading in grid covariates
   {
@@ -270,15 +243,27 @@ SpatGEV.wrapper <- function(covariates.folder, station.returns.file, station.ret
   n <- gridData$n
   
   # Saving the grid data here
-  saveRDS(gridData,file=file.path(output.temp.folder,"gridData.rds"))
+  #saveRDS(gridData,file=file.path(output.temp.folder,"gridData.rds"))
   
   # Saving also the data on the original list format
   gridDataList <- b
   names(gridDataList) <- nm
-  saveRDS(gridDataList,file=file.path(output.temp.folder,"gridDataList.rds"))
   
-  cat("\nFinished structuring of covariate grid.\n")
+  ## Deleting ununsed large objects
+  rm(a,b)
+  
+  if (create.tempfiles){
+  # Saving intermediate values to easily continue from here if bugs occurs
+  current.ls <- ls()
+  keep.var <- unique(c(current.ls[!(current.ls %in% initial.ls)],input.list))
+  save(list=keep.var, file=file.path(output.temp.folder,"temp_checkpoint_1.RData")) 
+  # Here we could delete variables which are not to be used below, to save RAM
   }
+
+  cat("\nCheckpoint 1: Finished structuring of covariate grid.\n")
+  
+  }
+  # Checkpoint 1
   
   ## Reading in station data
   {
@@ -352,10 +337,17 @@ SpatGEV.wrapper <- function(covariates.folder, station.returns.file, station.ret
   ## Go ahead and save the data lists here as individual files with their names corresponding to the 
   # name of the file.
   
-  saveRDS(StationData, file=file.path(output.temp.folder,"stationData.rds"))
-  
-  cat("\nFinished reading station data.\nNote: Ignore NA coercion warnings.\n")
+  if (create.tempfiles){
+  # Saving intermediate values to easily continue from here if bugs occurs
+  current.ls <- ls()
+  keep.var <- unique(c(current.ls[!(current.ls %in% initial.ls)],input.list))
+  save(list=keep.var, file=file.path(output.temp.folder,"temp_checkpoint_2.RData")) 
+  # Here we could delete variables which are not to be used below, to save RAM
   }
+    
+  cat("\nCheckpoint 2: Finished reading station data.\nNote: Ignore NA coercion warnings.\n")
+  }
+  # Checkpoint 2
   
   ## Running SpatGEV
   {
@@ -383,10 +375,18 @@ SpatGEV.wrapper <- function(covariates.folder, station.returns.file, station.ret
   
   R <- spatial.gev.bma(StationData$Y.list, StationData$X, StationData$S, mcmc.reps, prior, print.every = 1e2)
   tbl <- gev.process.results(R)
-  save(R, tbl, file=file.path(output.temp.folder,"mcmc.output.RData"))
   
-  cat("\nFinished running SpatGEV.\n")
+  if (create.tempfiles){
+  # Saving intermediate values to easily continue from here if bugs occurs
+  current.ls <- ls()
+  keep.var <- unique(c(current.ls[!(current.ls %in% initial.ls)],input.list))
+  save(list=keep.var,file=file.path(output.temp.folder,"temp_checkpoint_3.RData")) 
+  # Here we could delete variables which are not to be used below, to save RAM
   }
+  
+  cat("\nCheckpoint 3: Finished running SpatGEV.\n")
+  }
+  # Checkpoint 3
   
   ## Mapping posterior to grid
   {
@@ -407,26 +407,35 @@ SpatGEV.wrapper <- function(covariates.folder, station.returns.file, station.ret
   sigma.22.inv <- get.sigma.22.inv(R)
   sigma.22.inv.tau <- get.sigma.22.inv.tau(R, sigma.22.inv)
   
-  ##### TESTING Simply for testing purposes
+  ##### Additional layer simply for testing purposes
 
   if (testing){
-    N0=1000
-    N=N0
+    N0 <- testing
+    N <- N0
   }
-  l <- mclapply(1:N, "helper", mc.cores = cores, mc.silent=FALSE)  
+  l <- mclapply(1:N, "imputation.func", mc.cores = cores, mc.silent=FALSE,
+                cov.map=cov.map,S.map=S.map,R=R,sigma.22.inv=sigma.22.inv,
+                sigma.22.inv.tau=sigma.22.inv.tau,return.period=return.period,
+                all.post.quantiles=all.post.quantiles)
   Z.p <- matrix(unlist(l),length(all.post.quantiles))
   if (testing){
     N <- dim(cov.map)[1]
     copyMat <- t(matrix(rep(Z.p[,N0],each=N-N0),ncol=length(all.post.quantiles)))
     Z.p <- cbind(Z.p,copyMat)
-    }
-  saveRDS(Z.p,file=file.path(output.temp.folder,"mapreturns.rds"))
+  }
   
-    
-  cat("\nFinished mapping posterior to grid.\n")
+  # Saving intermediate values to easily continue from here if bugs occurs
+  if (create.tempfiles){
+  current.ls <- ls()
+  keep.var <- unique(c(current.ls[!(current.ls %in% initial.ls)],input.list))
+  save(list=keep.var,file=file.path(output.temp.folder,"temp_checkpoint_4.RData")) 
+  # Here we could delete variables which are not to be used below, to save RAM
+  }
+  cat("\nCheckpoint 4: Finished mapping posterior to grid.\n")
   
   
   }
+  # Checkpoint 4
 
   ## Writing final results to netcdf-file and image plots
   {
@@ -480,6 +489,7 @@ SpatGEV.wrapper <- function(covariates.folder, station.returns.file, station.ret
   }
   if (uncertainty.plot){
     IQR <- full.Z.p[this.IQR+1,]-full.Z.p[this.IQR,]
+    IQR0 <- IQR + 0 # to save a copy which is not transformed below
     ncvar_put(outputNc,varid=ncvar_defList[[this.IQR]],vals=IQR)
   }
   
@@ -493,16 +503,58 @@ SpatGEV.wrapper <- function(covariates.folder, station.returns.file, station.ret
     points(S[,1],S[,2])
   }
   if (uncertainty.plot){
-  retMat <- matrix(IQR, ncol=ny,nrow=nx)  # IQR specified above
+  retMat <- matrix(IQR0, ncol=ny,nrow=nx)  # IQR specified above
   image.plot(indX,indY,retMat,main=paste(returns.name,": Interquartile range uncertainty plot",sep=""),xlab="x",ylab="y")
   points(S[,1],S[,2])
   }
   dev.off()
   
-  # Should possibly improve this image, adding the possibility to return also an uncertainty plot with the IQR or so.
+  # Saving final data frame values to easily continue from here if bugs occurs
+  current.ls <- ls()
+  keep.var <- unique(c(current.ls[!(current.ls %in% initial.ls)],input.list))
+  save(list=keep.var,file=file.path(output.location,"final_output.RData")) 
+  # Here we could delete variables which are not to be used below, to save RAM
   
+  # Delete temporary files (?)
+  if (!keep.temp.files){
+    unlink(output.temp.folder,recursive = TRUE)
   }
   
+  cat("\nFunction run complete!\n")
+  
+  }
+  # Function completed!
 }
-  
-  
+
+covariates.folder <- "~/NR/SpatGEV/inputs/nc_files_used"
+station.returns.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
+station.returns.sheet <- 1 # The sheet name or index containing the station returns to be read
+station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
+output.location <- "~/NR/SpatGEV"
+output.folder.name <- "outputTemp6"
+return.period <- 20
+keep.temp.files <- TRUE
+mcmc.reps <- 5*10^2 # Should at least be 10^4
+cores <- 10 # 20 # The number of cores to be used for paralellization when mapping out the posterior to the grid
+post.quantiles <- c(0.025,0.5,0.975)
+uncertainty.plot <- TRUE
+testing <- 100 # How many locations do we test on? FALSE for performing imputation for the complete map.
+returns.name <- NULL # If NULL then the name of specified sheet is used
+create.tempfiles <- FALSE
+
+SpatGEV.wrapper(covariates.folder = covariates.folder, 
+                station.returns.file = station.returns.file,
+                station.returns.sheet = station.returns.sheet, 
+                station.locations.file = station.locations.file,
+                output.location = output.location,
+                output.folder.name = output.folder.name,
+                return.period = return.period,
+                keep.temp.files = keep.temp.files,
+                mcmc.reps = mcmc.reps,
+                cores = cores,
+                post.quantiles = post.quantiles,
+                uncertainty.plot = uncertainty.plot,
+                testing = testing, 
+                returns.name = returns.name,
+                create.tempfiles = create.tempfiles)
+
