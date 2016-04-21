@@ -13,7 +13,7 @@ Date: 2014-03-11
 
 Author: Martin Jullum, Alex Lenkoski, Gunnhildur Steinbakk
 
-Depends: SpatialExtremes,msm,coda,Rcpp
+Depends: SpatialExtremes,msm,coda,Rcpp,XLConnect,FNN,parallel,ncdf4,fields
 
 Imports: Rcpp,RcppArmadillo
 

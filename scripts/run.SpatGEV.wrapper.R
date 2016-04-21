@@ -10,19 +10,19 @@ station.returns.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
 station.returns.sheet <- 1 
 station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
 output.path <- "~/NR/SpatGEV"
-output.folder.name <- "output_test"
+output.folder.name <- "output_test2"
 return.period <- 20
 post.quantiles <- c(0.025,0.5,0.975)
 show.uncertainty <- TRUE
 coordinate.type <- "XY"
-mcmc.reps <- 5*10^2 # Should at least be 10^4
+mcmc.reps <- 5*10^3 # Should at least be 10^4
 burn.in <- 10^2
 cores <- 10 # 20 
 returns.name <- NULL 
 create.tempfiles <- FALSE
 keep.temp.files <- FALSE
-save.all.output <- TRUE
-testing <- 100 
+save.all.output <- FALSE
+testing <- 10000 
 
 
 SpatGEV.wrapper(covariates.folder = covariates.folder, 

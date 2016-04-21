@@ -62,7 +62,7 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
                             returns.name = NULL, # Name of return data used in output plots and netcdf files. If NULL, then the name of the specified sheet is used.
                             create.tempfiles = FALSE, # Logical indicating whether temporary files should be saved in a Temp folder to perform debugging and check intermediate variables/results if the function crashes
                             keep.temp.files = FALSE, # Logical indicating whether the temporary files (if written) should be kept or deleted on function completion
-                            save.all.output = TRUE, # Logical indicating whether all R objects should be save to file upon function completion. Allocates approx 1 Gb of space.
+                            save.all.output = TRUE, # Logical indicating whether all R objects should be save to file upon function completion. Allocates approx 2.5 Gb for all of Norway.
                             testing = FALSE){ # Variable indicating whether the run is a test or not. FALSE indicates no testing, a positive number indicates the number of locations being imputed
 
   ## Various initial fixing
@@ -144,7 +144,6 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
 
   indX <- a[[1]]$x
   indY <- a[[1]]$y
-  indZ <- a[[1]]$z
   
   nx <- length(indX)
   ny <- length(indY)
@@ -155,7 +154,7 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   allZ <- NULL
   b <- a
   for (i in 1:length(cov.files)){
-    z.vec <- c(indZ)
+    z.vec <- c(a[[i]]$z)
     mu.z.vec <- mean(z.vec, na.rm=TRUE)
     sd.z.vec <- sd(z.vec,na.rm=TRUE)  
     stand.z.vec <- (z.vec-mu.z.vec)/sd.z.vec
@@ -469,7 +468,7 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   }
   if (show.uncertainty){
   retMat <- matrix(IQR0, ncol=ny,nrow=nx)  # IQR specified above
-  image.plot(indX,indY,retMat,main=paste(returns.name,": Interquartile range uncertainty plot \n ", return.period," year period with ", returns.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
+  image.plot(indX,indY,retMat,main=paste("Interquartile range uncertainty plot \n ", return.period," year period with ", returns.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
   points(S[,1],S[,2])
   }
   dev.off()
