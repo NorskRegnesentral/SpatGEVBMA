@@ -227,7 +227,7 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   S <- matrix(NA,nrow=nS,ncol=2)  # Matrix with spatial location of the stations
   
   for (j in 1:nS){
-    thisStation <- which(SData.use$Stnr==stations[j]) 
+    thisStation <- which(SData.use$Stnr==stations[j])
       S[j,1] <- SData.use$x[thisStation]
       S[j,2] <- SData.use$y[thisStation]
   }
@@ -268,6 +268,10 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   for (j in 1:nS){ # Assuming the first column of th Ydata file contains the year
     # Extracting Ys
     StationData$Y.list[[j]] <- c(na.omit(dat[,j]))  # Removing NAs and ignoring the observation year
+    if (length(StationData$Y.list[[j]])==1){  
+      StationData$Y.list[[j]] <- rep(StationData$Y.list[[j]],2) # Duplicating the observation at a station if there is only a single observation
+                                                                # in order to avoid error in the gevmle function of SpatialExtremes
+    }
   }
     
   ## Go ahead and save the data lists here as individual files with their names corresponding to the 
