@@ -38,13 +38,14 @@
 ## Bugs/quality control
 # Ensure that the posterior is correctly written to the nc-file
 # Test procedure on data with LatLon coordinates: A) No bugs? B) Does it gives the same results?
-# Test the procedure on the norway-data (?)
 
 ## Features
 # Allow user specified prior distribution -- currently hard-coded to the default.
 # Check for colinearity in the covariates and throw out variables if this 
   # happens -- the current function gives an error on this event and the solution is to 
   # throw out the netcdf file messing it all up from the covariate folder.
+
+
 
 SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate files in netcdf-format (see above) 
                             station.returns.file, # File name of spreadsheet return file (see above)
@@ -56,9 +57,10 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
                             post.quantiles = c(0.025,0.5,0.975),  # Vector of quantiles for which the posterior should be evaluated
                             show.uncertainty = TRUE,  # Logical indicating whether an IQR uncertainty plot should also be provided
                             coordinate.type = "XY", # Character indicating the type/name of coordinate system being used, either "XY" or "LatLon" (see above)
+                            table.format = "html", # Character indicating the format for the covariate effect summary tables. Either "html" or "latex".
                             mcmc.reps = 10^5, # Number of MCMC runs for fitting the model with the station data. Should typically be at least be 10^5
                             burn.in = round(mcmc.reps*0.2), # The length of the initial burn-in period which is removed
-                            cores = detectCores()-1,  # The number of cores on the computer used for the imputation
+                            cores = 1, # The number of cores on the computer used for the imputation. Using detectCores()-1 is good for running on a laptop.
                             returns.name = NULL, # Name of return data used in output plots and netcdf files. If NULL, then the name of the specified sheet is used.
                             create.tempfiles = FALSE, # Logical indicating whether temporary files should be saved in a Temp folder to perform debugging and check intermediate variables/results if the function crashes
                             keep.temp.files = FALSE, # Logical indicating whether the temporary files (if written) should be kept or deleted on function completion
@@ -192,7 +194,7 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   }
   # Checkpoint 1
   
-  ## Reading in station data
+  ## Reading in station data and extracting corresponding covariates
   {
   fileYData <- loadWorkbook(station.returns.file)
   allYData <- readWorksheet(fileYData, sheet=station.returns.sheet)  # Ignore warnings
@@ -208,9 +210,23 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   }
   SData.use <- data.frame(Stnr=SData$Stnr, x=x.S, y=y.S)
 
-  StationData <- list()
   dat <- sapply(allYData,as.numeric)[,-1] # Ignore warnings
-  stations <- as.numeric(substring(colnames(dat),first=2))  # Assuming first row of Ydata file contains the station numbers (starting from column 2)
+  stations <- as.numeric(substring(colnames(dat),first=2)) # Updated further down
+  
+  # Extracting Y
+  Y.list <- list()
+  remove.station <- rep(FALSE,dim(dat)[2])
+  for (j in 1:dim(dat)[2]){ # Assuming the first column of the Ydata file contains the year
+    # Extracting Ys
+    Y.list[[j]] <- c(na.omit(dat[,j]))  # Removing NAs and ignoring the observation year
+    if (length(Y.list[[j]]) < 10){  
+      remove.station[j] = TRUE  # Removes the station if there are less than 10 observations in it
+      cat(paste("\nStation ",stations[j]," has only ",length(Y.list[[j]]), " observations, and is therefore removed.\n",sep=""))
+    }
+  }
+  Y.list[remove.station] <- NULL   # Removes station and moves the rest up with single brackets
+  
+  stations <- as.numeric(substring(colnames(dat),first=2))[!remove.station]  # Assuming first row of Ydata file contains the station numbers (starting from column 2)
   nS <- length(stations)
   
   # Getting the name from the sheet:
@@ -234,13 +250,13 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   colnames(S) <- c("x","y")
 
   ## Extracting X
-  # Basic function to be used to pick the closetest value when interpolation gives NA values
+  # Basic function to be used to pick the closest value when interpolation gives NA values
   get.nn <- function(data, labels, query) {
     nns <- get.knnx(data, query, k=1)
     labels[nns$nn.index]
   }
   
-  nX=length(gridDataList) 
+  nX=length(gridDataList)
   X = matrix(NA,ncol=nX,nrow=nS)
   for (j in 1:(nX)){
     X[,j]=interp.surface(obj=gridDataList[[j]],loc=S)
@@ -258,22 +274,20 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   }
   colnames(X) <- names(gridDataList)
   
+
+  # Updating X, S and stations after station removal
   X <- cbind(1,X)
+
   nX <- dim(X)[2] # Just updating this one...
-  
-  # Extracting Y
-  StationData$Y.list <- list()
+
+  # Putting all station data in a list
+  StationData <- list()
+  StationData$Y.list <- Y.list
   StationData$X <- X
   StationData$S <- S
-  for (j in 1:nS){ # Assuming the first column of th Ydata file contains the year
-    # Extracting Ys
-    StationData$Y.list[[j]] <- c(na.omit(dat[,j]))  # Removing NAs and ignoring the observation year
-    if (length(StationData$Y.list[[j]])==1){  
-      StationData$Y.list[[j]] <- rep(StationData$Y.list[[j]],2) # Duplicating the observation at a station if there is only a single observation
-                                                                # in order to avoid error in the gevmle function of SpatialExtremes
-    }
-  }
-    
+  
+  
+  
   ## Go ahead and save the data lists here as individual files with their names corresponding to the 
   # name of the file.
   
@@ -285,7 +299,7 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   # Here we could delete variables which are not to be used below, to save RAM
   }
     
-  cat("\nCheckpoint 2: Finished reading station data.\nNote: Ignore NA coercion warnings.\n\n")
+  cat("\nCheckpoint 2: Finished reading station data.\n\n")
   }
   # Checkpoint 2
   
@@ -317,7 +331,7 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   
   R <- R0  
 
-  # Removing burn.in
+  # Removing burn-in
   R$THETA <- R$THETA[-(1:burn.in),,]
   R$TAU <- R$TAU[-(1:burn.in),,]
   R$ALPHA <- R$ALPHA[-(1:burn.in),]
@@ -325,7 +339,25 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   R$LAMBDA <- R$LAMBDA[-(1:burn.in),]
   R$ACCEPT.TAU <- R$ACCEPT.TAU[-(1:burn.in),,]
   
+  # Create a table with covariate effects and similar to be written as 
   tbl <- gev.process.results(R)
+  rownames(tbl$tbl.mu) <- colnames(X)
+  rownames(tbl$tbl.kappa) <- colnames(X)
+  rownames(tbl$tbl.xi) <- colnames(X)
+    
+  tbl.names <- names(tbl)
+  write.tables <- paste("tbl$",tbl.names,sep="")
+  
+  if (table.format=="latex"){
+    table.format.short <- "tex"
+    }  else { 
+    table.format.short <- table.format 
+    }
+  for (i in 1:length(write.tables)){
+    eval(parse(text=paste("xx <- ",write.tables[i],sep="")))
+    xtab <- xtable(xx)   # Trust that the defualt ways to select the number of input variables works fine here
+    print.xtable(x=xtab,type=table.format,file=file.path(output.folder,paste("summary_",tbl.names[i],".",table.format.short,sep="")))
+  }
   
   if (create.tempfiles){
   # Saving intermediate values to easily continue from here if bugs occurs
@@ -335,7 +367,7 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   # Here we could delete variables which are not to be used below, to save RAM
   }
   
-  cat("\nCheckpoint 3: Finished running SpatGEV.\n")
+  cat("\nCheckpoint 3: Finished running SpatGEV.\n\n")
   }
   # Checkpoint 3
   
@@ -489,7 +521,7 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   }
   
   cat("\nFunction run complete!\n")
-  
+  cat("\nNote: Ignore NA coercion warnings.\n\n")
   }
   # Function completed!
 }
@@ -497,6 +529,8 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
 
 
 
+
+### Additional help functions
 
 get.sigma.22.inv <- function(R, burn=NULL, odens=1e3)
 {

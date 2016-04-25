@@ -730,8 +730,28 @@ gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log
         G$X.long <- rbind(G$X.long, matrix(X.all[i,], n.i, p, byrow=TRUE))
       }
     G$D <- D
+    
+    Y.list2 <- list()
+    k <- 1
+    which.single.obs <- rep(1,length(Y.list))
+    for (i in 1:length(Y.list)){
+      if (length(Y.list[[i]])>1){
+        Y.list2[[k]] <- Y.list[[i]]
+        k <- k+1
+        which.single.obs[i]=0
+      }
+    }
+    
+    
+    ML0 <- matrix(unlist(lapply(Y.list2,"gevmle")),ncol=3, byrow=TRUE)
 
-    ML <- matrix(unlist(lapply(Y.list,"gevmle")),ncol=3, byrow=TRUE)
+    ML.single.obs <- colMeans(ML0)
+
+    ML.t <- matrix(NA,ncol=length(Y.list),nrow=3)
+    ML.t[,as.logical(which.single.obs)] <- ML.single.obs
+    ML.t[,!as.logical(which.single.obs)] <- t(ML0)
+    ML <- t(ML.t) 
+
     G$prior <- NULL
 
     G$nonspatial <- nonspatial

@@ -10,19 +10,20 @@ station.returns.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
 station.returns.sheet <- 1 
 station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
 output.path <- "~/NR/SpatGEV"
-output.folder.name <- "output_test2"
+output.folder.name <- "output_test3"
 return.period <- 20
 post.quantiles <- c(0.025,0.5,0.975)
 show.uncertainty <- TRUE
 coordinate.type <- "XY"
-mcmc.reps <- 5*10^3 # Should at least be 10^4
+table.format = "html"
+mcmc.reps <- 5*10^2 # Should at least be 10^5
 burn.in <- 10^2
 cores <- 10 # 20 
 returns.name <- NULL 
 create.tempfiles <- FALSE
 keep.temp.files <- FALSE
 save.all.output <- FALSE
-testing <- 10000 
+testing <- 500
 
 
 SpatGEV.wrapper(covariates.folder = covariates.folder, 
@@ -35,6 +36,7 @@ SpatGEV.wrapper(covariates.folder = covariates.folder,
                 post.quantiles = post.quantiles,
                 show.uncertainty = show.uncertainty,
                 coordinate.type = coordinate.type,
+                table.format = table.format,
                 mcmc.reps = mcmc.reps,
                 burn.in = burn.in,
                 cores = cores,
@@ -65,6 +67,7 @@ output.path <- "~/NR/SpatGEV"
 post.quantiles <- c(0.025,0.5,0.975)
 show.uncertainty <- TRUE
 coordinate.type <- "XY"
+table.format = "html"
 mcmc.reps <- 2*10^5 
 burn.in <-4*10^4
 cores <- 10 # 20 
@@ -85,6 +88,8 @@ SpatGEV.wrapper(covariates.folder = covariates.folder,
                 return.period = return.period,
                 post.quantiles = post.quantiles,
                 show.uncertainty = show.uncertainty,
+                coordinate.type = coordinate.type,
+                table.format = table.format,
                 mcmc.reps = mcmc.reps,
                 burn.in = burn.in,
                 cores = cores,
@@ -110,6 +115,7 @@ output.path <- "~/NR/SpatGEV"
 post.quantiles <- c(0.025,0.5,0.975)
 show.uncertainty <- TRUE
 coordinate.type <- "XY"
+table.format = "html"
 mcmc.reps <- 2*10^5 
 burn.in <-4*10^4
 cores <- 10 # 20 
@@ -130,6 +136,8 @@ SpatGEV.wrapper(covariates.folder = covariates.folder,
                 return.period = return.period,
                 post.quantiles = post.quantiles,
                 show.uncertainty = show.uncertainty,
+                coordinate.type = coordinate.type,
+                table.format = table.format,
                 mcmc.reps = mcmc.reps,
                 burn.in = burn.in,
                 cores = cores,
@@ -140,51 +148,6 @@ SpatGEV.wrapper(covariates.folder = covariates.folder,
                 testing = testing)
 
 
-
-## Sheet 3 ### This does not run.
-
-rm(list=ls())
-
-library(SpatialGEVBMA)
-
-
-station.returns.sheet <- 3 
-return.period <- 20
-covariates.folder <- "~/NR/SpatGEV/inputs/nc_files_used" 
-station.returns.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
-station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
-output.path <- "~/NR/SpatGEV"
-post.quantiles <- c(0.025,0.5,0.975)
-show.uncertainty <- TRUE
-coordinate.type <- "XY"
-mcmc.reps <- 2*10^5 
-burn.in <-4*10^4
-cores <- 10 # 20 
-returns.name <- NULL 
-create.tempfiles <- FALSE
-keep.temp.files <- FALSE
-save.all.output <- TRUE
-testing <- FALSE 
-
-output.folder.name <- paste("output_dur_",station.returns.sheet,"_per_",return.period,sep="")
-
-SpatGEV.wrapper(covariates.folder = covariates.folder, 
-                station.returns.file = station.returns.file,
-                station.returns.sheet = station.returns.sheet, 
-                station.locations.file = station.locations.file,
-                output.path = output.path,
-                output.folder.name = output.folder.name,
-                return.period = return.period,
-                post.quantiles = post.quantiles,
-                show.uncertainty = show.uncertainty,
-                mcmc.reps = mcmc.reps,
-                burn.in = burn.in,
-                cores = cores,
-                returns.name = returns.name,
-                create.tempfiles = create.tempfiles,
-                keep.temp.files = keep.temp.files,
-                save.all.output = save.all.output,
-                testing = testing)
 
 
 
@@ -205,6 +168,7 @@ output.path <- "~/NR/SpatGEV"
 post.quantiles <- c(0.025,0.5,0.975)
 show.uncertainty <- TRUE
 coordinate.type <- "XY"
+table.format = "html"
 mcmc.reps <- 2*10^5 
 burn.in <-4*10^4
 cores <- 10 # 20 
@@ -225,6 +189,8 @@ SpatGEV.wrapper(covariates.folder = covariates.folder,
                 return.period = return.period,
                 post.quantiles = post.quantiles,
                 show.uncertainty = show.uncertainty,
+                coordinate.type = coordinate.type,
+                table.format = table.format,
                 mcmc.reps = mcmc.reps,
                 burn.in = burn.in,
                 cores = cores,
@@ -251,6 +217,7 @@ output.path <- "~/NR/SpatGEV"
 post.quantiles <- c(0.025,0.5,0.975)
 show.uncertainty <- TRUE
 coordinate.type <- "XY"
+table.format = "html"
 mcmc.reps <- 2*10^5 
 burn.in <-4*10^4
 cores <- 10 # 20 
@@ -271,6 +238,8 @@ SpatGEV.wrapper(covariates.folder = covariates.folder,
                 return.period = return.period,
                 post.quantiles = post.quantiles,
                 show.uncertainty = show.uncertainty,
+                coordinate.type = coordinate.type,
+                table.format = table.format,
                 mcmc.reps = mcmc.reps,
                 burn.in = burn.in,
                 cores = cores,
@@ -297,6 +266,7 @@ output.path <- "~/NR/SpatGEV"
 post.quantiles <- c(0.025,0.5,0.975)
 show.uncertainty <- TRUE
 coordinate.type <- "XY"
+table.format = "html"
 mcmc.reps <- 2*10^5 
 burn.in <-4*10^4
 cores <- 10 # 20 
@@ -317,6 +287,8 @@ SpatGEV.wrapper(covariates.folder = covariates.folder,
                 return.period = return.period,
                 post.quantiles = post.quantiles,
                 show.uncertainty = show.uncertainty,
+                coordinate.type = coordinate.type,
+                table.format = table.format,
                 mcmc.reps = mcmc.reps,
                 burn.in = burn.in,
                 cores = cores,
