@@ -426,52 +426,65 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   # Need one of the input files to specify parameters in the ncdf output file
   ncnc <- nc_open(cov.files.path[1])
 
-
   ### Just general definitions
+    
   # Define the dimensions
   if (coordinate.type=="XY"){
     x.ncdf <- ncdim_def( "X", "meters", ncnc$dim$X$vals)
     y.ncdf <- ncdim_def( "Y", "meters", ncnc$dim$Y$vals)
-    t.ncdf <- ncdim_def( "time", units = ncnc$dim$time$units, vals=ncnc$dim$time$vals, unlim=TRUE) # No idea what this time variable does, could probably just skip it.
-    dim.list <- list(X=x.ncdf,Y=y.ncdf,Time=t.ncdf)
+#    t.ncdf <- ncdim_def( "time", units = "days since 1900-01-01 00:00:00", vals=ncnc$dim$time$vals, unlim=TRUE) # No idea what this time variable does, could probably just skip it.
+    dim.list <- list(X=x.ncdf,Y=y.ncdf) #,Time=t.ncdf)
   }
   if (coordinate.type=="LatLon"){
     x.ncdf <- ncdim_def( "Lat", "degrees", ncnc$dim$Lat$vals)
     y.ncdf <- ncdim_def( "Lon", "degrees", ncnc$dim$Lon$vals)
-    t.ncdf <- ncdim_def( "time", units = ncnc$dim$time$units, vals=ncnc$dim$time$vals, unlim=TRUE) # No idea what this time variable does, could probably just skip it.
-    dim.list <- list(Lat=x.ncdf,Lon=y.ncdf,Time=t.ncdf)
+#    t.ncdf <- ncdim_def( "time", units = ncnc$dim$time$units, vals=ncnc$dim$time$vals, unlim=TRUE) # No idea what this time variable does, could probably just skip it.
+    dim.list <- list(Lat=x.ncdf,Lon=y.ncdf)#,Time=t.ncdf)
     }
 
   ncvar_defList <- list()
   shortName <- paste("quant_",post.quantiles,sep="")
-  longName <- paste(post.quantiles," quantile of the marginal posterior distribution for the 
-                    maximum precipition over ",return.period," years based on data: ",
+  longName <- paste(post.quantiles," quantile of the marginal posterior distribution for the maximum precipition over ",return.period," years based on data: ",
                     returns.name,".",sep="")
   
+  # Default variables attributes
+  output.unit = "millimeter"  
+  output.missval <- -999.99
+  output.chunksizes <- c(length(ncnc$dim$X$vals)/3,length(ncnc$dim$Y$vals)/3)
   
+  # Default global attributes  
+  output.references <- "Output from the the SpatGEV.wrapper function in the R-package SpatGEVBMA, developed in Dyrrdal, A. V. et al. (2015)"
+  output.referencesRpackage <- "https://github.com/NorskRegnesentral/SpatGEVBMA"
+  output.referencesPaper <- "Dyrrdal, A. V., Lenkoski, A., Thorarinsdottir, T. L., & Stordal, F. (2015). Bayesian hierarchical modeling of extreme hourly precipitation in Norway. Environmetrics, 26(2), 89-106."
+    output.var.version <- "no.version"  
+  #output.proj4.string <- "+proj=utm+zone=33+ellps=WGS84"  # MJ: This shouldn't really be hardcoded...
+  output.prod.date = substr(Sys.time(), 1, 10)
+  #output.conventions = "CF-1.4"
+  output.institution = "Norwegian Computing Center (Norsk Regnesentral)"
+    
   for (i in 1:length(post.quantiles)){
     if (post.quantiles[i]==0.5){
-      longName[i] <- paste("Median of the marginal posterior distribution for the maximum 
-                           precipition over ",return.period," years based on data: ",
+      longName[i] <- paste("Median of the marginal posterior distribution for the maximum precipition over ",return.period," years based on data: ",
                            returns.name,".",sep="")
     }
     ncvar_defList[[i]] <- ncvar_def(name=shortName[i],longname=longName[i],
-                                      units="mm",
+                                      units=output.unit,
                                       dim=dim.list,
-                                      missval=-999.99, # How missing values in input data are defined 
-                                      chunksizes = ncnc$var$precipitation_amount$chunksizes)
-    }
+                                      missval=output.missval, # How missing values in input data are defined 
+                                      chunksizes = output.chunksizes)
+  }
+  
+  IQRLongName <- paste("Interquartile range uncertainty measure: Difference between 0.75-quantile and 0.25-quantile for the maximum precipitaion over ",
+                       return.period," years based on data: ",returns.name,".",sep="")
   if (show.uncertainty){
     this.IQR <- length(post.quantiles)+1
     shortName <- c(shortName,"IQR")
-    longName <- c(longName,paste("Interquartile range uncertainty measure: Difference 
-                                 between 0.75-quantile and 0.25-quantile for the maximum 
-                                precipitaion over ",return.period," years based on data: ",returns.name,".",sep=""))
+    longName <- c(longName,IQRLongName)
        ncvar_defList[[this.IQR]] <- ncvar_def(name=shortName[this.IQR],longname=longName[this.IQR],
-                                    units="mm",
+                                    units=output.unit,
                                     dim=dim.list,
-                                    missval=-999.99, # How missing values in input data are defined 
-                                    chunksizes = ncnc$var$precipitation_amount$chunksizes)
+                                    missval=output.missval, # How missing values in input data are defined 
+                                    chunksizes = output.chunksizes)
   }
   
     
@@ -490,6 +503,17 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
     IQR0 <- IQR + 0 # to save a copy which is not transformed below
     ncvar_put(outputNc,varid=ncvar_defList[[this.IQR]],vals=IQR)
   }
+  
+  ### Putting global attributes to the nc-file:
+  # Default global attributes  
+  ncatt_put(outputNc,varid=0, attname = "references", attval = output.references)
+  ncatt_put(outputNc,varid=0, attname = "Rpackage", attval = output.referencesRpackage)
+  ncatt_put(outputNc,varid=0, attname = "Paper", attval = output.referencesPaper)
+  ncatt_put(outputNc,varid=0, attname = "var.version", attval = output.var.version)
+  #ncatt_put(outputNc,varid=0, attname = "proj4.string", attval = output.proj4.string)
+  ncatt_put(outputNc,varid=0, attname = "prod.date", attval = output.prod.date)
+  #ncatt_put(outputNc,varid=0, attname = "conventions", attval = output.conventions)
+  ncatt_put(outputNc,varid=0, attname = "institution", attval = output.institution)
   
   nc_close(outputNc)
 
