@@ -17,8 +17,8 @@
 # (set 'coordinate.type="XY"') or 'Lat' and 'Lon', with capital Ls (set 'coordinate.type="LatLon"').
 # All netcdf-files must give covariate values at the same spatial locations (there is currently no check for this)
 
-# The response data for stations are gathered in a spreadsheet located at 'station.returns.file',
-# at spreadsheet named or numbered 'station.returns.sheet'. The first column of this spreadsheet contains
+# The response data for stations are gathered in a spreadsheet located at 'station.annualMax.file',
+# at spreadsheet named or numbered 'station.annualMax.sheet'. The first column of this spreadsheet contains
 # the observation year, while first row contains the station number (starting from column 2)
 
 # The spatial locations for the station are given in a seperate table formatted txt-file with the first row 
@@ -48,8 +48,8 @@
 
 
 SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate files in netcdf-format (see above) 
-                            station.returns.file, # File name of spreadsheet return file (see above)
-                            station.returns.sheet = 1, # The sheet name or index containing the station returns to be read (exactly 1 number)
+                            station.annualMax.file, # File name of spreadsheet annualMax file (see above)
+                            station.annualMax.sheet = 1, # The sheet name or index containing the station annualMax to be read (exactly 1 number)
                             station.locations.file, # File name of table formatted textfile including the spatial locations of the stations 
                             output.path = getwd(),  # Path to the where the result folder should be stored
                             output.folder.name = "SpatGEV.res",  # Name of result folder
@@ -61,7 +61,7 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
                             mcmc.reps = 10^5, # Number of MCMC runs for fitting the model with the station data. Should typically be at least be 10^5
                             burn.in = round(mcmc.reps*0.2), # The length of the initial burn-in period which is removed
                             cores = 1, # The number of cores on the computer used for the imputation. Using detectCores()-1 is good for running on a laptop.
-                            returns.name = NULL, # Name of return data used in output plots and netcdf files. If NULL, then the name of the specified sheet is used.
+                            annualMax.name = NULL, # Name of annualMax data used in output plots and netcdf files. If NULL, then the name of the specified sheet is used.
                             create.tempfiles = FALSE, # Logical indicating whether temporary files should be saved in a Temp folder to perform debugging and check intermediate variables/results if the function crashes
                             keep.temp.files = FALSE, # Logical indicating whether the temporary files (if written) should be kept or deleted on function completion
                             save.all.output = TRUE, # Logical indicating whether all R objects should be save to file upon function completion. Allocates approx 2.5 Gb for all of Norway.
@@ -196,8 +196,8 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   
   ## Reading in station data and extracting corresponding covariates
   {
-  fileYData <- loadWorkbook(station.returns.file)
-  allYData <- readWorksheet(fileYData, sheet=station.returns.sheet)  # Ignore warnings
+  fileYData <- loadWorkbook(station.annualMax.file)
+  allYData <- readWorksheet(fileYData, sheet=station.annualMax.sheet)  # Ignore warnings
   
   SData <- read.table(station.locations.file,header=TRUE)
   if (coordinate.type=="XY"){
@@ -231,11 +231,11 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   
   # Getting the name from the sheet:
   
-  if (is.null(returns.name)){
-    if(is.character(station.returns.sheet)){
-      returns.name <- station.returns.sheet
+  if (is.null(annualMax.name)){
+    if(is.character(station.annualMax.sheet)){
+      annualMax.name <- station.annualMax.sheet
     } else {
-      returns.name <- getSheets(fileYData)[station.returns.sheet]
+      annualMax.name <- getSheets(fileYData)[station.annualMax.sheet]
     }
   }
   
@@ -445,7 +445,7 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   ncvar_defList <- list()
   shortName <- paste("quant_",post.quantiles,sep="")
   longName <- paste(post.quantiles," quantile of the marginal posterior distribution for the maximum precipition over ",return.period," years based on data: ",
-                    returns.name,".",sep="")
+                    annualMax.name,".",sep="")
   
   # Default variables attributes
   output.unit = "millimeter"  
@@ -465,7 +465,7 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   for (i in 1:length(post.quantiles)){
     if (post.quantiles[i]==0.5){
       longName[i] <- paste("Median of the marginal posterior distribution for the maximum precipition over ",return.period," years based on data: ",
-                           returns.name,".",sep="")
+                           annualMax.name,".",sep="")
     }
     ncvar_defList[[i]] <- ncvar_def(name=shortName[i],longname=longName[i],
                                       units=output.unit,
@@ -475,7 +475,7 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   }
   
   IQRLongName <- paste("Interquartile range uncertainty measure: Difference between 0.75-quantile and 0.25-quantile for the maximum precipitaion over ",
-                       return.period," years based on data: ",returns.name,".",sep="")
+                       return.period," years based on data: ",annualMax.name,".",sep="")
   if (show.uncertainty){
     this.IQR <- length(post.quantiles)+1
     shortName <- c(shortName,"IQR")
@@ -519,16 +519,16 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
 
   if (coordinate.type=="XY"){lab.name=c("x-coord","y-coord")}
   if (coordinate.type=="LatLon"){lab.name=c("Lat","Lon")}
-  filename.pdf <- file.path(output.folder,"posterior.return.grid.pdf")
+  filename.pdf <- file.path(output.folder,"posterior.return.level.grid.pdf")
   pdf(filename.pdf,width=7, height=7)
   for (j in 1:length(post.quantiles)){
     retMat <- matrix(full.Z.p[j,], ncol=ny,nrow=nx)  # This should be correct
-    image.plot(indX,indY,retMat,main=paste("Posterior ", post.quantiles[j], "-quantile \n ", return.period," year period with ", returns.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
+    image.plot(indX,indY,retMat,main=paste("Posterior ", post.quantiles[j], "-quantile \n ", return.period," year period with ", annualMax.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
     points(S[,1],S[,2])
   }
   if (show.uncertainty){
   retMat <- matrix(IQR0, ncol=ny,nrow=nx)  # IQR specified above
-  image.plot(indX,indY,retMat,main=paste("Interquartile range uncertainty plot \n ", return.period," year period with ", returns.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
+  image.plot(indX,indY,retMat,main=paste("Interquartile range uncertainty plot \n ", return.period," year period with ", annualMax.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
   points(S[,1],S[,2])
   }
   dev.off()

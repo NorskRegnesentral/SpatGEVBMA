@@ -6,11 +6,11 @@ library(SpatialGEVBMA)
 ### Quick Test
 
 covariates.folder <- "~/NR/SpatGEV/inputs/nc_files_used" 
-station.returns.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
-station.returns.sheet <- 1 
+station.annualMax.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
+station.annualMax.sheet <- 1 
 station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
 output.path <- "~/NR/SpatGEV"
-output.folder.name <- "output_test3"
+output.folder.name <- "output_test5"
 return.period <- 20
 post.quantiles <- c(0.025,0.5,0.975)
 show.uncertainty <- TRUE
@@ -19,7 +19,7 @@ table.format = "html"
 mcmc.reps <- 5*10^2 # Should at least be 10^5
 burn.in <- 10^2
 cores <- 10 # 20 
-returns.name <- NULL 
+annualMax.name <- NULL 
 create.tempfiles <- FALSE
 keep.temp.files <- FALSE
 save.all.output <- FALSE
@@ -27,8 +27,8 @@ testing <- 500
 
 
 SpatGEV.wrapper(covariates.folder = covariates.folder, 
-                station.returns.file = station.returns.file,
-                station.returns.sheet = station.returns.sheet, 
+                station.annualMax.file = station.annualMax.file,
+                station.annualMax.sheet = station.annualMax.sheet, 
                 station.locations.file = station.locations.file,
                 output.path = output.path,
                 output.folder.name = output.folder.name,
@@ -40,7 +40,7 @@ SpatGEV.wrapper(covariates.folder = covariates.folder,
                 mcmc.reps = mcmc.reps,
                 burn.in = burn.in,
                 cores = cores,
-                returns.name = returns.name,
+                annualMax.name = annualMax.name,
                 create.tempfiles = create.tempfiles,
                 keep.temp.files = keep.temp.files,
                 save.all.output = save.all.output,
@@ -57,11 +57,11 @@ rm(list=ls())
 
 library(SpatialGEVBMA)
 
-station.returns.sheet <- 1 
+station.annualMax.sheet <- 1 
 return.period <- 20
 
 covariates.folder <- "~/NR/SpatGEV/inputs/nc_files_used" 
-station.returns.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
+station.annualMax.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
 station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
 output.path <- "~/NR/SpatGEV"
 post.quantiles <- c(0.025,0.5,0.975)
@@ -71,17 +71,17 @@ table.format = "html"
 mcmc.reps <- 2*10^5 
 burn.in <-4*10^4
 cores <- 10 # 20 
-returns.name <- NULL 
+annualMax.name <- NULL 
 create.tempfiles <- TRUE
 keep.temp.files <- TRUE
 save.all.output <- TRUE
 testing <- FALSE 
 
-output.folder.name <- paste("output_dur_",station.returns.sheet,"_per_",return.period,sep="")
+output.folder.name <- paste("output_dur_",station.annualMax.sheet,"_per_",return.period,sep="")
 
 SpatGEV.wrapper(covariates.folder = covariates.folder, 
-                station.returns.file = station.returns.file,
-                station.returns.sheet = station.returns.sheet, 
+                station.annualMax.file = station.annualMax.file,
+                station.annualMax.sheet = station.annualMax.sheet, 
                 station.locations.file = station.locations.file,
                 output.path = output.path,
                 output.folder.name = output.folder.name,
@@ -93,7 +93,7 @@ SpatGEV.wrapper(covariates.folder = covariates.folder,
                 mcmc.reps = mcmc.reps,
                 burn.in = burn.in,
                 cores = cores,
-                returns.name = returns.name,
+                annualMax.name = annualMax.name,
                 create.tempfiles = create.tempfiles,
                 keep.temp.files = keep.temp.files,
                 save.all.output = save.all.output,
@@ -106,10 +106,10 @@ rm(list=ls())
 library(SpatialGEVBMA)
 
 
-station.returns.sheet <- 2 
+station.annualMax.sheet <- 2 
 return.period <- 20
 covariates.folder <- "~/NR/SpatGEV/inputs/nc_files_used" 
-station.returns.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
+station.annualMax.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
 station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
 output.path <- "~/NR/SpatGEV"
 post.quantiles <- c(0.025,0.5,0.975)
@@ -119,17 +119,17 @@ table.format = "html"
 mcmc.reps <- 2*10^5 
 burn.in <-4*10^4
 cores <- 10 # 20 
-returns.name <- NULL 
+annualMax.name <- NULL 
 create.tempfiles <- FALSE
 keep.temp.files <- FALSE
 save.all.output <- TRUE
 testing <- FALSE 
 
-output.folder.name <- paste("output_dur_",station.returns.sheet,"_per_",return.period,sep="")
+output.folder.name <- paste("output_dur_",station.annualMax.sheet,"_per_",return.period,sep="")
 
 SpatGEV.wrapper(covariates.folder = covariates.folder, 
-                station.returns.file = station.returns.file,
-                station.returns.sheet = station.returns.sheet, 
+                station.annualMax.file = station.annualMax.file,
+                station.annualMax.sheet = station.annualMax.sheet, 
                 station.locations.file = station.locations.file,
                 output.path = output.path,
                 output.folder.name = output.folder.name,
@@ -141,7 +141,7 @@ SpatGEV.wrapper(covariates.folder = covariates.folder,
                 mcmc.reps = mcmc.reps,
                 burn.in = burn.in,
                 cores = cores,
-                returns.name = returns.name,
+                annualMax.name = annualMax.name,
                 create.tempfiles = create.tempfiles,
                 keep.temp.files = keep.temp.files,
                 save.all.output = save.all.output,
@@ -159,10 +159,10 @@ rm(list=ls())
 library(SpatialGEVBMA)
 
 
-station.returns.sheet <- 4
+station.annualMax.sheet <- 4
 return.period <- 20
 covariates.folder <- "~/NR/SpatGEV/inputs/nc_files_used" 
-station.returns.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
+station.annualMax.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
 station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
 output.path <- "~/NR/SpatGEV"
 post.quantiles <- c(0.025,0.5,0.975)
@@ -172,17 +172,17 @@ table.format = "html"
 mcmc.reps <- 2*10^5 
 burn.in <-4*10^4
 cores <- 10 # 20 
-returns.name <- NULL 
+annualMax.name <- NULL 
 create.tempfiles <- FALSE
 keep.temp.files <- FALSE
 save.all.output <- TRUE
 testing <- FALSE 
 
-output.folder.name <- paste("output_dur_",station.returns.sheet,"_per_",return.period,sep="")
+output.folder.name <- paste("output_dur_",station.annualMax.sheet,"_per_",return.period,sep="")
 
 SpatGEV.wrapper(covariates.folder = covariates.folder, 
-                station.returns.file = station.returns.file,
-                station.returns.sheet = station.returns.sheet, 
+                station.annualMax.file = station.annualMax.file,
+                station.annualMax.sheet = station.annualMax.sheet, 
                 station.locations.file = station.locations.file,
                 output.path = output.path,
                 output.folder.name = output.folder.name,
@@ -194,7 +194,7 @@ SpatGEV.wrapper(covariates.folder = covariates.folder,
                 mcmc.reps = mcmc.reps,
                 burn.in = burn.in,
                 cores = cores,
-                returns.name = returns.name,
+                annualMax.name = annualMax.name,
                 create.tempfiles = create.tempfiles,
                 keep.temp.files = keep.temp.files,
                 save.all.output = save.all.output,
@@ -208,10 +208,10 @@ rm(list=ls())
 library(SpatialGEVBMA)
 
 
-station.returns.sheet <- 5
+station.annualMax.sheet <- 5
 return.period <- 20
 covariates.folder <- "~/NR/SpatGEV/inputs/nc_files_used" 
-station.returns.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
+station.annualMax.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
 station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
 output.path <- "~/NR/SpatGEV"
 post.quantiles <- c(0.025,0.5,0.975)
@@ -221,17 +221,17 @@ table.format = "html"
 mcmc.reps <- 2*10^5 
 burn.in <-4*10^4
 cores <- 10 # 20 
-returns.name <- NULL 
+annualMax.name <- NULL 
 create.tempfiles <- FALSE
 keep.temp.files <- FALSE
 save.all.output <- TRUE
 testing <- FALSE 
 
-output.folder.name <- paste("output_dur_",station.returns.sheet,"_per_",return.period,sep="")
+output.folder.name <- paste("output_dur_",station.annualMax.sheet,"_per_",return.period,sep="")
 
 SpatGEV.wrapper(covariates.folder = covariates.folder, 
-                station.returns.file = station.returns.file,
-                station.returns.sheet = station.returns.sheet, 
+                station.annualMax.file = station.annualMax.file,
+                station.annualMax.sheet = station.annualMax.sheet, 
                 station.locations.file = station.locations.file,
                 output.path = output.path,
                 output.folder.name = output.folder.name,
@@ -243,7 +243,7 @@ SpatGEV.wrapper(covariates.folder = covariates.folder,
                 mcmc.reps = mcmc.reps,
                 burn.in = burn.in,
                 cores = cores,
-                returns.name = returns.name,
+                annualMax.name = annualMax.name,
                 create.tempfiles = create.tempfiles,
                 keep.temp.files = keep.temp.files,
                 save.all.output = save.all.output,
@@ -257,10 +257,10 @@ rm(list=ls())
 library(SpatialGEVBMA)
 
 
-station.returns.sheet <- 6
+station.annualMax.sheet <- 6
 return.period <- 20
 covariates.folder <- "~/NR/SpatGEV/inputs/nc_files_used" 
-station.returns.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
+station.annualMax.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
 station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
 output.path <- "~/NR/SpatGEV"
 post.quantiles <- c(0.025,0.5,0.975)
@@ -270,17 +270,17 @@ table.format = "html"
 mcmc.reps <- 2*10^5 
 burn.in <-4*10^4
 cores <- 10 # 20 
-returns.name <- NULL 
+annualMax.name <- NULL 
 create.tempfiles <- FALSE
 keep.temp.files <- FALSE
 save.all.output <- TRUE
 testing <- FALSE 
 
-output.folder.name <- paste("output_dur_",station.returns.sheet,"_per_",return.period,sep="")
+output.folder.name <- paste("output_dur_",station.annualMax.sheet,"_per_",return.period,sep="")
 
 SpatGEV.wrapper(covariates.folder = covariates.folder, 
-                station.returns.file = station.returns.file,
-                station.returns.sheet = station.returns.sheet, 
+                station.annualMax.file = station.annualMax.file,
+                station.annualMax.sheet = station.annualMax.sheet, 
                 station.locations.file = station.locations.file,
                 output.path = output.path,
                 output.folder.name = output.folder.name,
@@ -292,7 +292,7 @@ SpatGEV.wrapper(covariates.folder = covariates.folder,
                 mcmc.reps = mcmc.reps,
                 burn.in = burn.in,
                 cores = cores,
-                returns.name = returns.name,
+                annualMax.name = annualMax.name,
                 create.tempfiles = create.tempfiles,
                 keep.temp.files = keep.temp.files,
                 save.all.output = save.all.output,
