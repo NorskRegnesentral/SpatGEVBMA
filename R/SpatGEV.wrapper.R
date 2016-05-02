@@ -523,12 +523,12 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   pdf(filename.pdf,width=7, height=7)
   for (j in 1:length(post.quantiles)){
     retMat <- matrix(full.Z.p[j,], ncol=ny,nrow=nx)  # This should be correct
-    image.plot(indX,indY,retMat,main=paste("Posterior ", post.quantiles[j], "-quantile \n ", return.period," year period with ", annualMax.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
+    image.plot(indX,indY,retMat,main=paste("Posterior ", post.quantiles[j], "-quantile \n ", return.period," year return value with ", annualMax.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
     points(S[,1],S[,2])
   }
   if (show.uncertainty){
   retMat <- matrix(IQR0, ncol=ny,nrow=nx)  # IQR specified above
-  image.plot(indX,indY,retMat,main=paste("Interquartile range uncertainty plot \n ", return.period," year period with ", annualMax.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
+  image.plot(indX,indY,retMat,main=paste("Interquartile range uncertainty plot \n ", return.period," year return value with ", annualMax.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
   points(S[,1],S[,2])
   }
   dev.off()
