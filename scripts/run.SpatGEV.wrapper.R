@@ -1,4 +1,3 @@
-
 rm(list=ls())
 
 library(SpatialGEVBMA)
@@ -7,17 +6,17 @@ library(SpatialGEVBMA)
 
 covariates.folder <- "~/NR/SpatGEV/inputs/nc_files_used" 
 station.annualMax.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx"
-station.annualMax.sheet <- 1 
+station.annualMax.sheet <- 3
 station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
 output.path <- "~/NR/SpatGEV"
 output.folder.name <- "output_test5"
-return.period <- 20
+return.period <- c(20,100,200)
 post.quantiles <- c(0.025,0.5,0.975)
 show.uncertainty <- TRUE
 coordinate.type <- "XY"
 table.format = "html"
-mcmc.reps <- 5*10^2 # Should at least be 10^5
-burn.in <- 10^2
+mcmc.reps <- 10^5 # Should at least be 10^5
+burn.in <- 10^4
 cores <- 10 # 20 
 annualMax.name <- NULL 
 create.tempfiles <- FALSE
