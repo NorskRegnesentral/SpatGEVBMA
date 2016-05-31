@@ -492,8 +492,7 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
         {
           if (post.quantiles[i]==0.5)
             {
-              longName[i] <- paste("Median of the marginal posterior distribution for the maximum precipition over ",return.period[j]," years based on data: ",
-                                   annualMax.name,".",sep="")
+              longName[i] <- paste("Median of the marginal posterior distribution for the ",return.period[j]," return level for precipitation based on data: ",annualMax.name,".",sep="")
             }
           ncvar_defList[[i]] <- ncvar_def(name=shortName[i],longname=longName[i],
                                           units=output.unit,
@@ -501,7 +500,6 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
                                           missval=output.missval, # How missing values in input data are defined 
                                           chunksizes = output.chunksizes)
         }
-      
       IQRLongName <- paste("Interquartile range uncertainty measure: Difference between 0.75-quantile and 0.25-quantile for the maximum precipitaion over ",
                            return.period[j]," years based on data: ",annualMax.name,".",sep="")
       if (show.uncertainty)
@@ -521,8 +519,8 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
       full.Z.p <- matrix(NA,ncol=n,nrow=length(all.post.quantiles))
       full.Z.p[,notNA] <- Z.p[,j,]
   
-      filename.nc <- file.path(output.folder,"posterior.grid.nc")
-      outputNc <- nc_create(filename=paste(filename.nc,"_return_",return.period[j],sep=""),vars=ncvar_defList)
+      filename.nc <- file.path(output.folder,"posterior.grid")
+      outputNc <- nc_create(filename=paste(filename.nc,"_return_",return.period[j],".nc",sep=""),vars=ncvar_defList)
       for (r in 1:length(post.quantiles))
         {
           ncvar_put(outputNc,varid=ncvar_defList[[r]],vals=full.Z.p[r,])  ##check
