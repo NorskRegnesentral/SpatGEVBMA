@@ -1,4 +1,4 @@
-Package: SpatialGEVBMA
+Package: SpatGEVBMA
 Type: Package
 Title: Hierarchical spatial generalized extreme value (GEV) modeling
         with Bayesian Model Averaging (BMA)

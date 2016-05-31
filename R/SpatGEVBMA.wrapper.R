@@ -6,7 +6,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
                             station.annualMax.sheet = 1, # The sheet name or index containing the station annualMax to be read (exactly 1 number)
                             station.locations.file, # File name of table formatted textfile including the spatial locations of the stations 
                             output.path = getwd(),  # Path to the where the result folder should be stored
-                            output.folder.name = "SpatGEV.res",  # Name of result folder
+                            output.folder.name = "SpatGEVBMA.res",  # Name of result folder
                             return.period = 20,  # Return period to impute results for (single number or a vector of numbers)
                             post.quantiles = c(0.025,0.5,0.975),  # Vector of quantiles for which the posterior should be evaluated
                             show.uncertainty = TRUE,  # Logical indicating whether an IQR uncertainty plot should also be provided
@@ -25,7 +25,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   {
   # Bookeeping for storing intermediate results
   initial.ls <- ls()  # To be used to subtract globally specified variables when saving intermediate variables
-  input.list <- names(formals(SpatGEV.wrapper)) # Want to keep the input variables
+  input.list <- names(formals(SpatGEVBMA.wrapper)) # Want to keep the input variables
     
   output.folder <- file.path(output.path,output.folder.name)
   output.temp.folder <- file.path(output.path,output.folder.name,"Temp")
@@ -338,7 +338,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
       ## Here we could delete variables which are not to be used below, to save RAM
     }
   
-  cat("\nCheckpoint 3: Finished running SpatGEV.\n\n")
+  cat("\nCheckpoint 3: Finished running spatial.gev.bma.\n\n")
   
   ## Checkpoint 3
   
@@ -433,7 +433,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
       output.chunksizes <- c(length(ncnc$dim$X$vals)/3,length(ncnc$dim$Y$vals)/3)
       
                                         # Default global attributes  
-      output.references <- "Output from the the SpatGEV.wrapper function in the R-package SpatGEVBMA, developed in Dyrrdal, A. V. et al. (2015)"
+      output.references <- "Output from the the SpatGEVBMA.wrapper function in the R-package SpatGEVBMA, developed in Dyrrdal, A. V. et al. (2015)"
       output.referencesRpackage <- "https://github.com/NorskRegnesentral/SpatGEVBMA"
       output.referencesPaper <- "Dyrrdal, A. V., Lenkoski, A., Thorarinsdottir, T. L., & Stordal, F. (2015). Bayesian hierarchical modeling of extreme hourly precipitation in Norway. Environmetrics, 26(2), 89-106."
       output.var.version <- "no.version"  
@@ -533,7 +533,6 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
     }
 
   cat("\nFunction run complete!\n")
-  cat("\nNote: Ignore NA coercion warnings.\n\n")
   # Function completed!
 }
 

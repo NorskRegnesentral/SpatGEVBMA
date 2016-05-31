@@ -2,4 +2,4 @@ exportPattern("^[[:alpha:]]+")
 
 import(SpatialExtremes,msm,coda,XLConnect,FNN,parallel,ncdf4,fields,xtable)
 
-useDynLib(SpatialGEVBMA)
+useDynLib(SpatGEVBMA)

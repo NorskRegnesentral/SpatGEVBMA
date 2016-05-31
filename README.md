@@ -1,6 +1,6 @@
 # SpatGEVBMA
 
-Package: SpatialGEVBMA
+Package: SpatGEVBMA
 
 Type: Package 
 

@@ -2,50 +2,50 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 ldot <- function(tau, alpha, lambda, D, a, b) {
-    .Call('SpatialGEVBMA_ldot', PACKAGE = 'SpatialGEVBMA', tau, alpha, lambda, D, a, b)
+    .Call('SpatGEVBMA_ldot', PACKAGE = 'SpatGEVBMA', tau, alpha, lambda, D, a, b)
 }
 
 j_double_prime_new <- function(tau, tau_hat, varsigma, kappa, xi_hat, eps) {
-    .Call('SpatialGEVBMA_j_double_prime_new', PACKAGE = 'SpatialGEVBMA', tau, tau_hat, varsigma, kappa, xi_hat, eps)
+    .Call('SpatGEVBMA_j_double_prime_new', PACKAGE = 'SpatGEVBMA', tau, tau_hat, varsigma, kappa, xi_hat, eps)
 }
 
 j_prime_new <- function(tau, tau_hat, varsigma, kappa, xi_hat, eps) {
-    .Call('SpatialGEVBMA_j_prime_new', PACKAGE = 'SpatialGEVBMA', tau, tau_hat, varsigma, kappa, xi_hat, eps)
+    .Call('SpatGEVBMA_j_prime_new', PACKAGE = 'SpatGEVBMA', tau, tau_hat, varsigma, kappa, xi_hat, eps)
 }
 
 gev_like_new <- function(Y, mu, kappa, xi) {
-    .Call('SpatialGEVBMA_gev_like_new', PACKAGE = 'SpatialGEVBMA', Y, mu, kappa, xi)
+    .Call('SpatGEVBMA_gev_like_new', PACKAGE = 'SpatGEVBMA', Y, mu, kappa, xi)
 }
 
 g_prime_new <- function(tau, tau_hat, varsigma, xi, kappa_hat, eps) {
-    .Call('SpatialGEVBMA_g_prime_new', PACKAGE = 'SpatialGEVBMA', tau, tau_hat, varsigma, xi, kappa_hat, eps)
+    .Call('SpatGEVBMA_g_prime_new', PACKAGE = 'SpatGEVBMA', tau, tau_hat, varsigma, xi, kappa_hat, eps)
 }
 
 g_double_prime_new <- function(tau, tau_hat, varsigma, xi, kappa_hat, eps) {
-    .Call('SpatialGEVBMA_g_double_prime_new', PACKAGE = 'SpatialGEVBMA', tau, tau_hat, varsigma, xi, kappa_hat, eps)
+    .Call('SpatGEVBMA_g_double_prime_new', PACKAGE = 'SpatGEVBMA', tau, tau_hat, varsigma, xi, kappa_hat, eps)
 }
 
 f_prime_new <- function(tau, tau_hat, varsigma, xi, kappa, R) {
-    .Call('SpatialGEVBMA_f_prime_new', PACKAGE = 'SpatialGEVBMA', tau, tau_hat, varsigma, xi, kappa, R)
+    .Call('SpatGEVBMA_f_prime_new', PACKAGE = 'SpatGEVBMA', tau, tau_hat, varsigma, xi, kappa, R)
 }
 
 f_double_prime_new <- function(tau, tau_hat, varsigma, xi, kappa, R) {
-    .Call('SpatialGEVBMA_f_double_prime_new', PACKAGE = 'SpatialGEVBMA', tau, tau_hat, varsigma, xi, kappa, R)
+    .Call('SpatGEVBMA_f_double_prime_new', PACKAGE = 'SpatGEVBMA', tau, tau_hat, varsigma, xi, kappa, R)
 }
 
 g_eta_prime_new <- function(tau, tau_hat, varsigma, xi, eta_hat, eps) {
-    .Call('SpatialGEVBMA_g_eta_prime_new', PACKAGE = 'SpatialGEVBMA', tau, tau_hat, varsigma, xi, eta_hat, eps)
+    .Call('SpatGEVBMA_g_eta_prime_new', PACKAGE = 'SpatGEVBMA', tau, tau_hat, varsigma, xi, eta_hat, eps)
 }
 
 g_eta_double_prime_new <- function(tau, tau_hat, varsigma, xi, eta_hat, eps) {
-    .Call('SpatialGEVBMA_g_eta_double_prime_new', PACKAGE = 'SpatialGEVBMA', tau, tau_hat, varsigma, xi, eta_hat, eps)
+    .Call('SpatGEVBMA_g_eta_double_prime_new', PACKAGE = 'SpatGEVBMA', tau, tau_hat, varsigma, xi, eta_hat, eps)
 }
 
 gevUpdateM <- function(Y, X, M, alpha, lambda, D, beta0, Omega0) {
-    .Call('SpatialGEVBMA_gevUpdateM', PACKAGE = 'SpatialGEVBMA', Y, X, M, alpha, lambda, D, beta0, Omega0)
+    .Call('SpatGEVBMA_gevUpdateM', PACKAGE = 'SpatGEVBMA', Y, X, M, alpha, lambda, D, beta0, Omega0)
 }
 
 A <- function(p) {
-    .Call('SpatialGEVBMA_A', PACKAGE = 'SpatialGEVBMA', p)
+    .Call('SpatGEVBMA_A', PACKAGE = 'SpatGEVBMA', p)
 }
 

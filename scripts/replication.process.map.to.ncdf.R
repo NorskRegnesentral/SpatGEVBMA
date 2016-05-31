@@ -1,6 +1,6 @@
 rm(list = ls())
 
-library(SpatialGEVBMA)
+library(SpatGEVBMA)
 
 setwd("~/NR/SpatGEVBMA")
 
