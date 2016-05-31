@@ -1,59 +1,13 @@
 
-#### Basic manual and input data file format requirements -- to be put in help file ####
-
-# This is a wrapper for running the spatial.gev.bma function in the SpatGEV package
-# and imputing the results on a spatial grid with covariate values, based on a
-# netcdf-file for the covariate grid, a spreadsheet with responses at observation stations
-# and their spatial location in a text-file. The output is a netcdf-file with user specified
-# posterior quantiles for the user specified return period, in addition to spatial maps of 
-# these and an optional InterQuartile Range (IQR) uncertainty map. In addtion the input variables
-# are written to file.
 
 
-# The grid covariates values are placed in netcdf-files in the folder 'covariate.folder'.
-# The spatial coordinate system can be whatever you like as long as it is decimal spaced 
-# (not minutes and seconds) and the same coordinate system is used for the location of 
-# the stations (see below). The coordinates must either be specified by captial 'X' and 'Y' 
-# (set 'coordinate.type="XY"') or 'Lat' and 'Lon', with capital Ls (set 'coordinate.type="LatLon"').
-# All netcdf-files must give covariate values at the same spatial locations (there is currently no check for this)
-
-# The response data for stations are gathered in a spreadsheet located at 'station.annualMax.file',
-# at spreadsheet named or numbered 'station.annualMax.sheet'. The first column of this spreadsheet contains
-# the observation year, while first row contains the station number (starting from column 2)
-
-# The spatial locations for the station are given in a seperate table formatted txt-file with the first row 
-# containing the column names. A column named 'Stnr' must be present to denote the station number corresponding to those
-# in the spreadsheet. If 'coordinate.type="XY"', then there must be columns 'X' and 'Y' specifying
-# their spatial location in the same coordinate system as used in the netcdf covariate files. 
-# If 'coordinate.type="LatLon"', there must be columns 'Lat' and 'Lon' corresponding to the 
-# format in the netcdf-file.
-
-# All stations needs to be within the area covered by the grid of covariate values
-
-# Results are imputed only in the locations where all covariates are available
-
-
-### TO DO ###
-
-## Bugs/quality control
-# Ensure that the posterior is correctly written to the nc-file
-# Test procedure on data with LatLon coordinates: A) No bugs? B) Does it gives the same results?
-
-## Features
-# Allow user specified prior distribution -- currently hard-coded to the default.
-# Check for colinearity in the covariates and throw out variables if this 
-  # happens -- the current function gives an error on this event and the solution is to 
-  # throw out the netcdf file messing it all up from the covariate folder.
-
-
-
-SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate files in netcdf-format (see above) 
+SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariate files in netcdf-format (see above) 
                             station.annualMax.file, # File name of spreadsheet annualMax file (see above)
                             station.annualMax.sheet = 1, # The sheet name or index containing the station annualMax to be read (exactly 1 number)
                             station.locations.file, # File name of table formatted textfile including the spatial locations of the stations 
                             output.path = getwd(),  # Path to the where the result folder should be stored
                             output.folder.name = "SpatGEV.res",  # Name of result folder
-                            return.period = 20,  # Return period to impute results for (exactly 1 number)
+                            return.period = 20,  # Return period to impute results for (single number or a vector of numbers)
                             post.quantiles = c(0.025,0.5,0.975),  # Vector of quantiles for which the posterior should be evaluated
                             show.uncertainty = TRUE,  # Logical indicating whether an IQR uncertainty plot should also be provided
                             coordinate.type = "XY", # Character indicating the type/name of coordinate system being used, either "XY" or "LatLon" (see above)
@@ -228,7 +182,7 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
       if (length(Y.list[[j]]) < 10)
         {
           remove.station[j] = TRUE  # Removes the station if there are less than 10 observations in it
-          cat(paste("\nStation ",stations[j]," has only ",length(Y.list[[j]]), " observations, and is therefore removed.\n",sep=""))
+          cat(paste("\nStation ",stations[j]," has only ",length(Y.list[[j]]), " observation(s), and is therefore removed.\n",sep=""))
         }
     }
   Y.list[remove.station] <- NULL   # Removes station and moves the rest up with single brackets
