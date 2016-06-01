@@ -45,6 +45,7 @@ SpatGEV.wrapper(covariates.folder = covariates.folder,
                 save.all.output = save.all.output,
                 testing = testing)
 
+quit(save = "no")
 
 
 ### The full run 1

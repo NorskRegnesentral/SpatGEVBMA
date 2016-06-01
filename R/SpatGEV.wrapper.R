@@ -341,7 +341,8 @@ SpatGEV.wrapper <- function(covariates.folder, # Path to folder with covariate f
   ##prior$xi$Omega.0 <- diag(p)##solve(diag(c(100,rep(100,dim(X.all)[2] - 1))))
   
   R0 <- spatial.gev.bma(StationData$Y.list, StationData$X, StationData$S, mcmc.reps, prior, print.every = 1e2)
-  
+
+  save(R0, file=paste(output.folder,"/mcmc.RData",sep=""))
   R <- R0  
   
   ## Removing burn-in

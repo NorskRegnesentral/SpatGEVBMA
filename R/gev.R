@@ -711,7 +711,7 @@ gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log
     G <- NULL
     n.s <- length(Y.list)
     G$n.s <- n.s
-    D <- make.D(S,S)
+
     p.max <- dim(X.all)[2]
     p <- p.max
     G$p <- p
@@ -776,7 +776,7 @@ gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log
     G$alpha.mu <- 1/var(tau)[1]
     G$lambda.mu <- 1    
     if (!G$nonspatial) {
-      temp <- optimize(gp.like.lambda,interval=c(0,1e4),G$alpha.mu, tau, D)
+      temp <- optimize(gp.like.lambda,interval=c(0,1e4),G$alpha.mu, tau, D) ## here
       G$lambda.mu <- temp[[1]]
     }
     G$prior$mu <- NULL
@@ -1247,7 +1247,7 @@ gev.impute <- function(R,X.drop, S.drop, burn = NULL, n.each = NULL,return.param
 spatial.gev.bma <- function(Y.list, X.all,S,n.reps,prior.user= NULL, full = FALSE, fixed.xi = NULL, print.every=0,nonspatial=FALSE,log.kappa=FALSE)
   {
     #print("THIS IS THE NEW VERSION OF SpatialGEVBMA")
-    G <- gev.init(Y.list,X.all,S, prior.user,full,fixed.xi,nonspatial, log.kappa)
+    G <- gev.init(Y.list,X.all,S, prior.user,full,fixed.xi,nonspatial, log.kappa) 
     R <- gev.results.init(length(Y.list), dim(X.all)[2], n.reps)
     R$S <- S
     R$fixed.xi <- fixed.xi
