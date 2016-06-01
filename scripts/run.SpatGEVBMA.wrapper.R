@@ -1,6 +1,6 @@
 rm(list=ls())
 
-library(SpatialGEVBMA)
+library(SpatGEVBMA)
 
 ### Quick Test
 
@@ -9,23 +9,23 @@ station.annualMax.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx
 station.annualMax.sheet <- 3
 station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
 output.path <- "~/NR/SpatGEV"
-output.folder.name <- "output_test5"
-return.period <- c(20,100,200)
+output.folder.name <- "output_test9"
+return.period <- c(20,150)
 post.quantiles <- c(0.025,0.5,0.975)
 show.uncertainty <- TRUE
 coordinate.type <- "XY"
 table.format = "html"
-mcmc.reps <- 10^5 # Should at least be 10^5
-burn.in <- 10^4
-cores <- 10 # 20 
+mcmc.reps <- 500 # Should at least be 10^5
+burn.in <- 100
+cores <- 1 # 20 
 annualMax.name <- NULL 
 create.tempfiles <- FALSE
 keep.temp.files <- FALSE
 save.all.output <- FALSE
-testing <- 500
+testing <- 100
 
 
-SpatGEV.wrapper(covariates.folder = covariates.folder, 
+SpatGEVBMA.wrapper(covariates.folder = covariates.folder,
                 station.annualMax.file = station.annualMax.file,
                 station.annualMax.sheet = station.annualMax.sheet, 
                 station.locations.file = station.locations.file,
@@ -79,7 +79,7 @@ testing <- FALSE
 
 output.folder.name <- paste("output_dur_",station.annualMax.sheet,"_per_",return.period,sep="")
 
-SpatGEV.wrapper(covariates.folder = covariates.folder, 
+SpatGEVBMA.wrapper(covariates.folder = covariates.folder, 
                 station.annualMax.file = station.annualMax.file,
                 station.annualMax.sheet = station.annualMax.sheet, 
                 station.locations.file = station.locations.file,
@@ -127,7 +127,7 @@ testing <- FALSE
 
 output.folder.name <- paste("output_dur_",station.annualMax.sheet,"_per_",return.period,sep="")
 
-SpatGEV.wrapper(covariates.folder = covariates.folder, 
+SpatGEVBMA.wrapper(covariates.folder = covariates.folder, 
                 station.annualMax.file = station.annualMax.file,
                 station.annualMax.sheet = station.annualMax.sheet, 
                 station.locations.file = station.locations.file,
@@ -180,7 +180,7 @@ testing <- FALSE
 
 output.folder.name <- paste("output_dur_",station.annualMax.sheet,"_per_",return.period,sep="")
 
-SpatGEV.wrapper(covariates.folder = covariates.folder, 
+SpatGEVBMA.wrapper(covariates.folder = covariates.folder, 
                 station.annualMax.file = station.annualMax.file,
                 station.annualMax.sheet = station.annualMax.sheet, 
                 station.locations.file = station.locations.file,
@@ -229,7 +229,7 @@ testing <- FALSE
 
 output.folder.name <- paste("output_dur_",station.annualMax.sheet,"_per_",return.period,sep="")
 
-SpatGEV.wrapper(covariates.folder = covariates.folder, 
+SpatGEVBMA.wrapper(covariates.folder = covariates.folder, 
                 station.annualMax.file = station.annualMax.file,
                 station.annualMax.sheet = station.annualMax.sheet, 
                 station.locations.file = station.locations.file,
@@ -278,7 +278,7 @@ testing <- FALSE
 
 output.folder.name <- paste("output_dur_",station.annualMax.sheet,"_per_",return.period,sep="")
 
-SpatGEV.wrapper(covariates.folder = covariates.folder, 
+SpatGEVBMA.wrapper(covariates.folder = covariates.folder, 
                 station.annualMax.file = station.annualMax.file,
                 station.annualMax.sheet = station.annualMax.sheet, 
                 station.locations.file = station.locations.file,

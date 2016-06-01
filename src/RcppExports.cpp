@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // ldot
 arma::colvec ldot(arma::colvec tau, double alpha, double lambda, arma::mat D, double a, double b);
-RcppExport SEXP SpatialGEVBMA_ldot(SEXP tauSEXP, SEXP alphaSEXP, SEXP lambdaSEXP, SEXP DSEXP, SEXP aSEXP, SEXP bSEXP) {
+RcppExport SEXP SpatGEVBMA_ldot(SEXP tauSEXP, SEXP alphaSEXP, SEXP lambdaSEXP, SEXP DSEXP, SEXP aSEXP, SEXP bSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -24,7 +24,7 @@ END_RCPP
 }
 // j_double_prime_new
 double j_double_prime_new(double tau, double tau_hat, double varsigma, double kappa, double xi_hat, arma::colvec eps);
-RcppExport SEXP SpatialGEVBMA_j_double_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP kappaSEXP, SEXP xi_hatSEXP, SEXP epsSEXP) {
+RcppExport SEXP SpatGEVBMA_j_double_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP kappaSEXP, SEXP xi_hatSEXP, SEXP epsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -40,7 +40,7 @@ END_RCPP
 }
 // j_prime_new
 double j_prime_new(double tau, double tau_hat, double varsigma, double kappa, double xi_hat, arma::colvec eps);
-RcppExport SEXP SpatialGEVBMA_j_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP kappaSEXP, SEXP xi_hatSEXP, SEXP epsSEXP) {
+RcppExport SEXP SpatGEVBMA_j_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP kappaSEXP, SEXP xi_hatSEXP, SEXP epsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -56,7 +56,7 @@ END_RCPP
 }
 // gev_like_new
 arma::colvec gev_like_new(arma::colvec Y, double mu, double kappa, double xi);
-RcppExport SEXP SpatialGEVBMA_gev_like_new(SEXP YSEXP, SEXP muSEXP, SEXP kappaSEXP, SEXP xiSEXP) {
+RcppExport SEXP SpatGEVBMA_gev_like_new(SEXP YSEXP, SEXP muSEXP, SEXP kappaSEXP, SEXP xiSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -70,7 +70,7 @@ END_RCPP
 }
 // g_prime_new
 double g_prime_new(double tau, double tau_hat, double varsigma, double xi, double kappa_hat, arma::colvec eps);
-RcppExport SEXP SpatialGEVBMA_g_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP xiSEXP, SEXP kappa_hatSEXP, SEXP epsSEXP) {
+RcppExport SEXP SpatGEVBMA_g_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP xiSEXP, SEXP kappa_hatSEXP, SEXP epsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -86,7 +86,7 @@ END_RCPP
 }
 // g_double_prime_new
 double g_double_prime_new(double tau, double tau_hat, double varsigma, double xi, double kappa_hat, arma::colvec eps);
-RcppExport SEXP SpatialGEVBMA_g_double_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP xiSEXP, SEXP kappa_hatSEXP, SEXP epsSEXP) {
+RcppExport SEXP SpatGEVBMA_g_double_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP xiSEXP, SEXP kappa_hatSEXP, SEXP epsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -102,7 +102,7 @@ END_RCPP
 }
 // f_prime_new
 double f_prime_new(double tau, double tau_hat, double varsigma, double xi, double kappa, arma::colvec R);
-RcppExport SEXP SpatialGEVBMA_f_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP xiSEXP, SEXP kappaSEXP, SEXP RSEXP) {
+RcppExport SEXP SpatGEVBMA_f_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP xiSEXP, SEXP kappaSEXP, SEXP RSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -118,7 +118,7 @@ END_RCPP
 }
 // f_double_prime_new
 double f_double_prime_new(double tau, double tau_hat, double varsigma, double xi, double kappa, arma::colvec R);
-RcppExport SEXP SpatialGEVBMA_f_double_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP xiSEXP, SEXP kappaSEXP, SEXP RSEXP) {
+RcppExport SEXP SpatGEVBMA_f_double_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP xiSEXP, SEXP kappaSEXP, SEXP RSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -134,7 +134,7 @@ END_RCPP
 }
 // g_eta_prime_new
 double g_eta_prime_new(double tau, double tau_hat, double varsigma, double xi, double eta_hat, arma::colvec eps);
-RcppExport SEXP SpatialGEVBMA_g_eta_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP xiSEXP, SEXP eta_hatSEXP, SEXP epsSEXP) {
+RcppExport SEXP SpatGEVBMA_g_eta_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP xiSEXP, SEXP eta_hatSEXP, SEXP epsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -150,7 +150,7 @@ END_RCPP
 }
 // g_eta_double_prime_new
 double g_eta_double_prime_new(double tau, double tau_hat, double varsigma, double xi, double eta_hat, arma::colvec eps);
-RcppExport SEXP SpatialGEVBMA_g_eta_double_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP xiSEXP, SEXP eta_hatSEXP, SEXP epsSEXP) {
+RcppExport SEXP SpatGEVBMA_g_eta_double_prime_new(SEXP tauSEXP, SEXP tau_hatSEXP, SEXP varsigmaSEXP, SEXP xiSEXP, SEXP eta_hatSEXP, SEXP epsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -166,7 +166,7 @@ END_RCPP
 }
 // gevUpdateM
 arma::colvec gevUpdateM(arma::colvec Y, arma::mat X, arma::colvec M, double alpha, double lambda, arma::mat D, arma::colvec beta0, arma::mat Omega0);
-RcppExport SEXP SpatialGEVBMA_gevUpdateM(SEXP YSEXP, SEXP XSEXP, SEXP MSEXP, SEXP alphaSEXP, SEXP lambdaSEXP, SEXP DSEXP, SEXP beta0SEXP, SEXP Omega0SEXP) {
+RcppExport SEXP SpatGEVBMA_gevUpdateM(SEXP YSEXP, SEXP XSEXP, SEXP MSEXP, SEXP alphaSEXP, SEXP lambdaSEXP, SEXP DSEXP, SEXP beta0SEXP, SEXP Omega0SEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -184,7 +184,7 @@ END_RCPP
 }
 // A
 IntegerMatrix A(int p);
-RcppExport SEXP SpatialGEVBMA_A(SEXP pSEXP) {
+RcppExport SEXP SpatGEVBMA_A(SEXP pSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;

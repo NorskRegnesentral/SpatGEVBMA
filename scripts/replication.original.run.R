@@ -1,7 +1,7 @@
 ##  This script replicates the results from Dyrrdal et al.
 rm(list = ls())
 
-library(SpatialGEVBMA)
+library(SpatGEVBMA)
 
 setwd("~/NR/SpatGEV/")
 
