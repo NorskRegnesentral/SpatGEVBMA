@@ -714,6 +714,7 @@ gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log
 
     p.max <- dim(X.all)[2]
     p <- p.max
+    D <- make.D(S,S)
     G$p <- p
     G$Y.list <- Y.list
     G$X <- X.all
