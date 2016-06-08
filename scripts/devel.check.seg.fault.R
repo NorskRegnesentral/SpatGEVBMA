@@ -22,6 +22,12 @@ C <- exp(-1/lambda * D)/alpha
 diag(C) <- diag(C) + 1e-5
 solve(C)
 
-library(SpatialGEVBMA)
+library(SpatGEVBMA)
 
 solve(C)
+
+library(SpatGEVBMA)
+
+data(norway)
+attach(norway)
+a <- spatial.gev.bma(Y.list,X,as.matrix(S),2)
