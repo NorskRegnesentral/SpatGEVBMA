@@ -70,6 +70,8 @@ SpatGEV.wrapper(covariates.folder, station.annualMax.file,station.annualMax.shee
 }
   \item{coordinate.type}{Character indicating the type/name of coordinate system being used, either "XY" or "LatLon" (see above)
 }
+  \item{transform.output}{Character specifying whether and how the output should be transformed. NULL corresponds to no transformation. "UTM_QQ_to_LatLon" transforms from UTM QQ (insert number) to LatLon
+}
   \item{table.format}{Character indicating the format for the covariate effect summary tables. Either "html" or "latex".
 }
   \item{mcmc.reps}{Number of MCMC runs for fitting the model with the station data. Should typically be at least be 10^5

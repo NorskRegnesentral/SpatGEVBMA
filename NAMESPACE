@@ -1,5 +1,5 @@
 exportPattern("^[[:alpha:]]+")
 
-import(SpatialExtremes,msm,coda,XLConnect,FNN,parallel,ncdf4,fields,xtable)
+import(msm,coda,XLConnect,FNN,parallel,ncdf4,fields,xtable,SpatialExtremes,PBSmapping)
 
 useDynLib(SpatGEVBMA)

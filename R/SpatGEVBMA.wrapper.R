@@ -11,6 +11,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
                             post.quantiles = c(0.025,0.5,0.975),  # Vector of quantiles for which the posterior should be evaluated
                             show.uncertainty = TRUE,  # Logical indicating whether an IQR uncertainty plot should also be provided
                             coordinate.type = "XY", # Character indicating the type/name of coordinate system being used, either "XY" or "LatLon" (see above)
+                            transform.output = NULL, # Character specifying whether and how the output should be transformed. NULL corresponds to no transformation. "UTM_QQ_to_LatLon" transforms from UTM QQ (insert number) to LatLon
                             table.format = "html", # Character indicating the format for the covariate effect summary tables. Either "html" or "latex".
                             mcmc.reps = 10^5, # Number of MCMC runs for fitting the model with the station data. Should typically be at least be 10^5
                             burn.in = round(mcmc.reps*0.2), # The length of the initial burn-in period which is removed
@@ -20,6 +21,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
                             keep.temp.files = FALSE, # Logical indicating whether the temporary files (if written) should be kept or deleted on function completion
                             save.all.output = TRUE, # Logical indicating whether all R objects should be save to file upon function completion. Allocates approx 2.5 Gb for all of Norway.
                             testing = FALSE) # Variable indicating whether the run is a test or not. FALSE indicates no testing, a positive number indicates the number of locations being imputed
+
 
   ## Various initial fixing
   {
@@ -84,16 +86,14 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
         }
       if (coordinate.type=="LatLon")
         {
-          a[[i]]$x <- a0$dim$Lat$vals
-          a[[i]]$y <- a0$dim$Lon$vals
+          a[[i]]$x <- a0$dim$Lon$vals
+          a[[i]]$y <- a0$dim$Lat$vals
         }
-      ## Sorting the variables such that the appear in increasing coordinate order.
-      order.x <- order(a[[i]]$x)
-      order.y <- order(a[[i]]$y)
-      a[[i]]$x <- a[[i]]$x[order.x]
+      ## Sorting the variables such that the appear in increasing coordinate order (fields default)
+      order.y <- length(a[[i]]$y):1
       a[[i]]$y <- a[[i]]$y[order.y]
       
-      a[[i]]$z <- ncvar_get(a0)[order.x,order.y]
+      a[[i]]$z <- ncvar_get(a0)[,order.y]
       nc_close(a0)
       nm[i] <- strsplit(cov.files[i],".",fixed=TRUE)[[1]][1]
       
@@ -164,8 +164,8 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
     }
   if (coordinate.type=="LatLon")
     {
-      x.S <- SData$Lat
-      y.S <- SData$Lon
+      x.S <- SData$Lon
+      y.S <- SData$Lat
     }
   SData.use <- data.frame(Stnr=SData$Stnr, x=x.S, y=y.S)
 
@@ -381,7 +381,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
       N <- dim(cov.map)[1]
       Z.temp <- Z.p
       Z.p <- array(data = NA, dim = c(length(all.post.quantiles), length(return.period), N))
-      w.i <- sample(1:dim(Z.temp)[3],N,replace=TRUE)
+      w.i <- c(1:N0,sample(1:N0,N-N0,replace=TRUE))
       Z.p <- Z.temp[,,w.i,drop=FALSE]
     }
   
@@ -397,26 +397,90 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   
   
   # Checkpoint 4
-
-  ## Writing final results to netcdf-file and image plots
-   
+  
+  ## Transforming coordinate system output if applicable
+  
   ## Need one of the input files to specify parameters in the ncdf output file
   ncnc <- nc_open(cov.files.path[1])
+  
+  
+  if(!is.null(transform.output)){
+    UTM.zone <- as.numeric(substr(transform.output,start=5,stop=6))
+    
+    # Assume coordinate.type=="XY"
+    rangeX <- range(indX)
+    rangeY <- range(indY)
+    
+    allXYMat <- data.frame(X=allX,Y=allY)
+    
+    #Set projection and zone
+    attr(allXYMat, "projection") <- "UTM"
+    attr(allXYMat, "zone") <- UTM.zone
+    
+    #Compute LL coordinates
+    allLLMat <- as.matrix(round(convUL(allXYMat, km=FALSE), digits=4))
+    
+    indLon <- seq(from = min(allLLMat[,1]),to = max(allLLMat[,1]),length.out = nx)
+    indLat <- seq(from = min(allLLMat[,2]),to = max(allLLMat[,2]),length.out = ny)
+    
+    allLon <- rep(indLon,each=ny)
+    allLat <- rep(indLat,times=nx)
+    
+    allLL <- cbind(X=allLon,Y=allLat)
+    
+    # Set projection and zone
+    attr(allLL, "projection") <- "LL"
+    attr(allLL, "zone") <- UTM.zone
+    
+    #Compute UTM coordinates
+    XYGrid <- as.matrix(round(convUL(allLL, km=FALSE), digits=0))
+  
+    # Transform the S matrix to LatLon as well
+    
+    S.new <- cbind(X=S[,1],Y=S[,2])
+    
+    attr(S.new, "projection") <- "UTM"
+    attr(S.new, "zone") <- UTM.zone
+    
+    #Compute LL coordinates
+    S <- as.matrix(round(convUL(S.new, km=FALSE), digits=4))
+    
+  }
+
+  ## Writing final results to netcdf-file and image plots
+  
   ## Define the dimensions
   if (coordinate.type=="XY")
     {
-      x.ncdf <- ncdim_def( "X", "meters", ncnc$dim$X$vals)
-      y.ncdf <- ncdim_def( "Y", "meters", ncnc$dim$Y$vals)
-      ##    t.ncdf <- ncdim_def( "time", units = "days since 1900-01-01 00:00:00", vals=ncnc$dim$time$vals, unlim=TRUE) # No idea what this time variable does, could probably just skip it.
-      dim.list <- list(X=x.ncdf,Y=y.ncdf) #,Time=t.ncdf)
+    if (is.null(transform.output)){
+
+      output.x <- indX
+      output.y <- indY
+      
+      x.ncdf <- ncdim_def( "X", "meters", output.x)
+      y.ncdf <- ncdim_def( "Y", "meters", output.y[ny:1])
+    } else {
+      
+      original.image <- list(x=indX,y=indY)
+      
+      output.x <- indLon
+      output.y <- indLat
+      
+      x.ncdf <- ncdim_def( "Lon", "degrees", output.x)
+      y.ncdf <- ncdim_def( "Lat", "degrees", output.y[ny:1])
+    }
+
+    dim.list <- list(X=x.ncdf,Y=y.ncdf)
     }
   
   if (coordinate.type=="LatLon")
     {
-      x.ncdf <- ncdim_def( "Lat", "degrees", ncnc$dim$Lat$vals)
-      y.ncdf <- ncdim_def( "Lon", "degrees", ncnc$dim$Lon$vals)
-      ##    t.ncdf <- ncdim_def( "time", units = ncnc$dim$time$units, vals=ncnc$dim$time$vals, unlim=TRUE) # No idea what this time variable does, could probably just skip it.
-      dim.list <- list(Lat=x.ncdf,Lon=y.ncdf)#,Time=t.ncdf)
+      output.x <- indX
+      output.y <- indY
+
+      x.ncdf <- ncdim_def( "Lon", "degrees", output.x)
+      y.ncdf <- ncdim_def( "Lat", "degrees", output.y[ny:1])
+      dim.list <- list(Lon=x.ncdf,Lat=y.ncdf)
     }
   
   ncvar_defList <- list()
@@ -431,7 +495,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
       ## Default variables attributes
       output.unit = "millimeter"  
       output.missval <- -999.99
-      output.chunksizes <- c(length(ncnc$dim$X$vals)/3,length(ncnc$dim$Y$vals)/3)
+      output.chunksizes <- c(length(output.x)/3,length(output.y)/3)
       
                                         # Default global attributes  
       output.references <- "Output from the the SpatGEVBMA.wrapper function in the R-package SpatGEVBMA, developed in Dyrrdal, A. V. et al. (2015)"
@@ -476,15 +540,26 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   
       filename.nc <- file.path(output.folder,"posterior.grid")
       outputNc <- nc_create(filename=paste(filename.nc,"_return_",return.period[j],".nc",sep=""),vars=ncvar_defList)
+      retMat.quant=list()
       for (r in 1:length(post.quantiles))
         {
-          ncvar_put(outputNc,varid=ncvar_defList[[r]],vals=full.Z.p[r,])  ##check
+        retMat.quant[[r]] <- matrix(full.Z.p[r,], ncol=ny,nrow=nx)
+        if (!is.null(transform.output)){
+          original.image$z <- retMat.quant[[r]]
+          interp.values <- interp.surface(obj=original.image, loc=XYGrid)
+          retMat.quant[[r]] <- matrix(interp.values, ncol=ny,nrow=nx,byrow=T)
+        }
+          ncvar_put(outputNc,varid=ncvar_defList[[r]],vals=c(retMat.quant[[r]][,ny:1]))  ##check
         }
       if (show.uncertainty)
         {
-          IQR <- full.Z.p[this.IQR+1,]-full.Z.p[this.IQR,]
-          IQR0 <- IQR + 0 # to save a copy which is not transformed below
-          ncvar_put(outputNc,varid=ncvar_defList[[this.IQR]],vals=IQR)
+          retMat.IQR <- matrix(full.Z.p[this.IQR+1,]-full.Z.p[this.IQR,],ncol=ny,nrow=nx) # This part of full.Z.p is not transformed above
+          if (!is.null(transform.output)){
+            original.image$z <- retMat.IQR
+            interp.values <- interp.surface(obj=original.image, loc=XYGrid)
+            retMat.IQR <- matrix(interp.values, ncol=ny,nrow=nx,byrow=T)
+          }
+          ncvar_put(outputNc,varid=ncvar_defList[[this.IQR]],vals=c(retMat.IQR[,ny:1]))
         }
   
       ## Putting global attributes to the nc-file:
@@ -500,20 +575,26 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   
       nc_close(outputNc)
 
-      if (coordinate.type=="XY"){lab.name=c("x-coord","y-coord")}
-      if (coordinate.type=="LatLon"){lab.name=c("Lat","Lon")}
+      if (coordinate.type=="XY"){
+        if (is.null(transform.output)){
+          lab.name=c("x-coord","y-coord")
+        } else {
+          lab.name=c("Lon","Lat")
+        }
+      }
+      if (coordinate.type=="LatLon"){
+        lab.name=c("Lon","Lat")
+      }
       filename.pdf <- file.path(output.folder,paste("posterior.return.level.",return.period[j],"grid.pdf",sep=""))
       pdf(filename.pdf,width=7, height=7)
       for (r in 1:length(post.quantiles))
         {
-          retMat <- matrix(full.Z.p[r,], ncol=ny,nrow=nx)  # This should be correct
-          image.plot(indX,indY,retMat,main=paste("Posterior ", post.quantiles[r], "-quantile \n ", return.period[j]," year return value with ", annualMax.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
+          image.plot(output.x,output.y,retMat.quant[[r]],main=paste("Posterior ", post.quantiles[r], "-quantile \n ", return.period[j]," year return value with ", annualMax.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
           points(S[,1],S[,2])
         }
       if (show.uncertainty)
         {
-          retMat <- matrix(IQR0, ncol=ny,nrow=nx)  # IQR specified above
-          image.plot(indX,indY,retMat,main=paste("Interquartile range uncertainty plot \n ", return.period[j]," year return value with ", annualMax.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
+          image.plot(output.x,output.y,retMat.IQR,main=paste("Interquartile range uncertainty plot \n ", return.period[j]," year return value with ", annualMax.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
           points(S[,1],S[,2])
         }
       dev.off()
