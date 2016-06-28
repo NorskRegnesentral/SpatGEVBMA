@@ -459,6 +459,8 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
       
       x.ncdf <- ncdim_def( "X", "meters", output.x)
       y.ncdf <- ncdim_def( "Y", "meters", output.y[ny:1])
+      
+      dim.list <- list(X=x.ncdf,Y=y.ncdf)
     } else {
       
       original.image <- list(x=indX,y=indY)
@@ -466,11 +468,13 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
       output.x <- indLon
       output.y <- indLat
       
-      x.ncdf <- ncdim_def( "Lon", "degrees", output.x)
-      y.ncdf <- ncdim_def( "Lat", "degrees", output.y[ny:1])
+      x.ncdf <- ncdim_def( "Lon", "degrees_E", output.x)
+      y.ncdf <- ncdim_def( "Lat", "degrees_N", output.y[ny:1])
+      
+      dim.list <- list(Lon=x.ncdf,Lat=y.ncdf)
+      
     }
 
-    dim.list <- list(X=x.ncdf,Y=y.ncdf)
     }
   
   if (coordinate.type=="LatLon")
@@ -478,8 +482,8 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
       output.x <- indX
       output.y <- indY
 
-      x.ncdf <- ncdim_def( "Lon", "degrees", output.x)
-      y.ncdf <- ncdim_def( "Lat", "degrees", output.y[ny:1])
+      x.ncdf <- ncdim_def( "Lon", "degrees_E", output.x)
+      y.ncdf <- ncdim_def( "Lat", "degrees_N", output.y[ny:1])
       dim.list <- list(Lon=x.ncdf,Lat=y.ncdf)
     }
   
@@ -488,7 +492,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   for(j in 1:length(return.period))
     {
       ## Just general definitions
-      shortName <- paste("quant_",post.quantiles,sep="")
+      shortName <- paste("quant_",gsub(".","_",post.quantiles,fixed=TRUE),sep="")  # The gsub thing replaces the dot with a underscore
       longName <- paste(post.quantiles," quantile of the marginal posterior distribution for the maximum precipition over ",return.period[j]," years based on data: ",
                         annualMax.name,".",sep="")
       
@@ -616,6 +620,8 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
 
   cat("\nFunction run complete!\n")
   # Function completed!
+  
+  ### This
 }
 
 

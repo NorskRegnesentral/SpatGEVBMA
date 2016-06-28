@@ -9,8 +9,8 @@ station.annualMax.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx
 station.annualMax.sheet <- 3
 station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
 output.path <- "~/NR/SpatGEV"
-output.folder.name <- "output_test9"
-return.period <- c(20,150)
+output.folder.name <- "test_old3"
+return.period <- c(100)
 post.quantiles <- c(0.025,0.5,0.975)
 show.uncertainty <- TRUE
 coordinate.type <- "XY"
@@ -57,8 +57,8 @@ station.annualMax.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx
 station.annualMax.sheet <- 3
 station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
 output.path <- "~/NR/SpatGEV"
-output.folder.name <- "output_test9123"
-return.period <- c(20,150)
+output.folder.name <- "test_new2"
+return.period <- c(100)
 post.quantiles <- c(0.025,0.5,0.975)
 show.uncertainty <- TRUE
 coordinate.type <- "XY"
@@ -66,7 +66,7 @@ transform.output = "UTM_33_to_LatLon"
 table.format = "html"
 mcmc.reps <- 500 # Should at least be 10^5
 burn.in <- 100
-cores <- 1 # 20 
+cores <- 5 # 20 
 annualMax.name <- NULL 
 create.tempfiles <- FALSE
 keep.temp.files <- FALSE
