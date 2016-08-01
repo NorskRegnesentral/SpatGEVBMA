@@ -1,5 +1,5 @@
-\name{SpatGEV.wrapper}
-\alias{SpatGEV.wrapper}
+\name{SpatGEVBMA.wrapper}
+\alias{SpatGEVBMA.wrapper}
 
 \title{Wrapper for spatial.gev.bma with netcdf files
 
@@ -35,7 +35,7 @@
  
 }
 \usage{
-SpatGEV.wrapper(covariates.folder, station.annualMax.file,station.annualMax.sheet = 1,
+SpatGEVBMA.wrapper(covariates.folder, station.annualMax.file,station.annualMax.sheet = 1,
 	station.locations.file, output.path = getwd(), output.folder.name = "SpatGEV.res",
 	return.period = 20, post.quantiles = c(0.025,0.5,0.975), show.uncertainty = TRUE, 
 	coordinate.type = "XY", table.format = "html", mcmc.reps = 10^5, 
