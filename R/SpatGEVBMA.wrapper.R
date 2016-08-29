@@ -20,7 +20,8 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
                             create.tempfiles = FALSE, # Logical indicating whether temporary files should be saved in a Temp folder to perform debugging and check intermediate variables/results if the function crashes
                             keep.temp.files = FALSE, # Logical indicating whether the temporary files (if written) should be kept or deleted on function completion
                             save.all.output = TRUE, # Logical indicating whether all R objects should be save to file upon function completion. Allocates approx 2.5 Gb for all of Norway.
-                            testing = FALSE) # Variable indicating whether the run is a test or not. FALSE indicates no testing, a positive number indicates the number of locations being imputed
+                            testing = FALSE, # Variable indicating whether the run is a test or not. FALSE indicates no testing, a positive number indicates the number of locations being imputed
+                            seed = 123) # The seed used in the mcmc computations
 
 
   ## Various initial fixing
@@ -294,6 +295,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   ##prior$kappa$Omega.0 <- diag(p)/1e6##solve(diag(c(100,rep(100,dim(X.all)[2] - 1))))
   ##prior$xi$Omega.0 <- diag(p)##solve(diag(c(100,rep(100,dim(X.all)[2] - 1))))
   
+  set.seed(seed)
   R0 <- spatial.gev.bma(StationData$Y.list, StationData$X, as.matrix(StationData$S), mcmc.reps, prior, print.every = 1e2)
 
   save(R0, file=paste(output.folder,"/mcmc.RData",sep=""))
@@ -374,13 +376,13 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
                 sigma.22.inv.tau=sigma.22.inv.tau,return.period=return.period,
                 all.post.quantiles=all.post.quantiles,N=N)
   
-  Z.p <- array(data = unlist(l),dim = c(length(all.post.quantiles),length(return.period),N)) ## TEst this
+  Z.p <- array(data = unlist(l),dim = c(length(return.period),length(all.post.quantiles),N)) ## TEst this
   
   if (testing)
     {
       N <- dim(cov.map)[1]
       Z.temp <- Z.p
-      Z.p <- array(data = NA, dim = c(length(all.post.quantiles), length(return.period), N))
+      Z.p <- array(data = NA, dim = c(length(return.period),length(all.post.quantiles), N))
       w.i <- c(1:N0,sample(1:N0,N-N0,replace=TRUE))
       Z.p <- Z.temp[,,w.i,drop=FALSE]
     }
@@ -540,7 +542,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
       notNA <- which(!(1:n %in% ww.na))
   
       full.Z.p <- matrix(NA,ncol=n,nrow=length(all.post.quantiles))
-      full.Z.p[,notNA] <- Z.p[,j,]
+      full.Z.p[,notNA] <- Z.p[j,,]
   
       filename.nc <- file.path(output.folder,"posterior.grid")
       outputNc <- nc_create(filename=paste(filename.nc,"_return_",return.period[j],".nc",sep=""),vars=ncvar_defList)
