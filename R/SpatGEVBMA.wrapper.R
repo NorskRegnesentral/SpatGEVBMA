@@ -310,7 +310,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   R$ACCEPT.TAU <- R$ACCEPT.TAU[-(1:burn.in),,]
   
   ## Create a table with covariate effects and similar to be written as 
-  tbl <- gev.process.results(R)
+  tbl <- gev.process.results(R,burn=0)  # burn=0 as burnin is already removed...
   rownames(tbl$tbl.mu) <- colnames(X)
   rownames(tbl$tbl.kappa) <- colnames(X)
   rownames(tbl$tbl.xi) <- colnames(X)

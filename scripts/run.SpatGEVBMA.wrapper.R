@@ -9,22 +9,22 @@ station.annualMax.file <- "~/NR/SpatGEV/inputs/station_data/AM_allDurations.xlsx
 station.annualMax.sheet <- 3
 station.locations.file <- "~/NR/SpatGEV/inputs/station_data/metadata_stations_1hour.txt"
 output.path <- "~/NR/SpatGEV"
-output.folder.name <- "test_old3"
-return.period <- c(100)
+output.folder.name <- "basic"
+return.period <- c(200)
 post.quantiles <- c(0.025,0.5,0.975)
 show.uncertainty <- TRUE
 coordinate.type <- "XY"
 transform.output = NULL
 table.format = "html"
-mcmc.reps <- 500 # Should at least be 10^5
+mcmc.reps <- 100 # Should at least be 10^5
 burn.in <- 100
-cores <- 1 # 20 
+cores <- 5 # 20 
 annualMax.name <- NULL 
 create.tempfiles <- FALSE
 keep.temp.files <- FALSE
 save.all.output <- FALSE
 testing <- 100
-
+seed <- 123
 
 SpatGEVBMA.wrapper(covariates.folder = covariates.folder,
                 station.annualMax.file = station.annualMax.file,
@@ -45,7 +45,10 @@ SpatGEVBMA.wrapper(covariates.folder = covariates.folder,
                 create.tempfiles = create.tempfiles,
                 keep.temp.files = keep.temp.files,
                 save.all.output = save.all.output,
-                testing = testing)
+                testing = testing,
+                seed = seed)
+
+
 
 rm(list=ls())
 library(SpatGEVBMA)
