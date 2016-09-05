@@ -35,7 +35,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
 
   if (show.uncertainty)
     {
-      all.post.quantiles <- sort(unique(c(post.quantiles,c(0.25,0.75))))
+      all.post.quantiles <- c(post.quantiles,c(0.25,0.75))   # The use of sort and unique here messes up things below, so avoid using it.
     }
   
   ## Initial handling of directories
