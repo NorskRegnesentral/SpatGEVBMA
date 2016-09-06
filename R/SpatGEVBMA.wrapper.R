@@ -369,7 +369,9 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
     {
       N0 <- testing
       N <- N0
-    }
+  }
+  
+  RNGkind("L'Ecuyer-CMRG") # In order to get the same 
   
   l <- mclapply(1:N, "imputation.func", mc.cores = cores, mc.silent=FALSE,
                 cov.map=cov.map,S.map=S.map,R=R,sigma.22.inv=sigma.22.inv,
