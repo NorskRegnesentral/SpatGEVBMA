@@ -26,6 +26,11 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
 
   ## Various initial fixing
   {
+  if (!requireNamespace("XLConnect", quietly = TRUE)) {
+    stop("XLConnect needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+  
   # Bookeeping for storing intermediate results
   initial.ls <- ls()  # To be used to subtract globally specified variables when saving intermediate variables
   input.list <- names(formals(SpatGEVBMA.wrapper)) # Want to keep the input variables
@@ -154,8 +159,8 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   # Checkpoint 1
   
   ## Reading in station data and extracting corresponding covariates
-  fileYData <- loadWorkbook(station.annualMax.file)
-  allYData <- suppressWarnings(readWorksheet(fileYData, sheet=station.annualMax.sheet))  # Ignore warnings
+  fileYData <- XLConnect::loadWorkbook(station.annualMax.file)
+  allYData <- suppressWarnings(XLConnect::readWorksheet(fileYData, sheet=station.annualMax.sheet))  # Ignore warnings
   
   SData <- read.table(station.locations.file,header=TRUE)
   if (coordinate.type=="XY")

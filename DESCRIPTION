@@ -5,7 +5,8 @@ Title: Hierarchical spatial generalized extreme value (GEV) modeling
 Version: 1.0
 Date: 2014-03-11
 Author: Alex Lenkoski
-Depends: msm,coda,Rcpp,XLConnect,FNN,parallel,ncdf4,fields,xtable,SpatialExtremes,PBSmapping
+Depends: msm,coda,Rcpp,FNN,parallel,ncdf4,fields,xtable,SpatialExtremes,PBSmapping
+Suggests: XLConnect
 Imports: Rcpp,RcppArmadillo
 LinkingTo: Rcpp,RcppArmadillo
 Maintainer: Alex Lenkoski <alex@nr.no>
