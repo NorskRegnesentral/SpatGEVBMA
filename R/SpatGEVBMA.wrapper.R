@@ -204,7 +204,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
         {
           annualMax.name <- station.annualMax.sheet
         } else {
-          annualMax.name <- getSheets(fileYData)[station.annualMax.sheet]
+          annualMax.name <- XLConnect::getSheets(fileYData)[station.annualMax.sheet]
         }
     }
   
