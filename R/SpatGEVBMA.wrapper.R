@@ -21,7 +21,8 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
                             keep.temp.files = FALSE, # Logical indicating whether the temporary files (if written) should be kept or deleted on function completion
                             save.all.output = TRUE, # Logical indicating whether all R objects should be save to file upon function completion. Allocates approx 2.5 Gb for all of Norway.
                             testing = FALSE, # Variable indicating whether the run is a test or not. FALSE indicates no testing, a positive number indicates the number of locations being imputed
-                            seed = 123) # The seed used in the mcmc computations
+                            seed = 123, # The seed used in the mcmc computations
+                            fixed.xi = NULL) # Where we want the shape parameter fixed
 
 
   ## Various initial fixing
@@ -301,7 +302,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   ##prior$xi$Omega.0 <- diag(p)##solve(diag(c(100,rep(100,dim(X.all)[2] - 1))))
   
   set.seed(seed)
-  R0 <- spatial.gev.bma(StationData$Y.list, StationData$X, as.matrix(StationData$S), mcmc.reps, prior, print.every = 1e2)
+  R0 <- spatial.gev.bma(StationData$Y.list, StationData$X, as.matrix(StationData$S), mcmc.reps, prior, print.every = 1e2, fixed.xi = fixed.xi)
 
   save(R0, file=paste(output.folder,"/mcmc.RData",sep=""))
   R <- R0  
