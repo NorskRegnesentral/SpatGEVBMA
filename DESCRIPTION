@@ -12,3 +12,4 @@ LinkingTo: Rcpp,RcppArmadillo
 Maintainer: Alex Lenkoski <alex@nr.no>
 Description: This package fits a hierarchical spatial model for the generalized extreme value distribution with the option of model averaging over the space of covariates.
 License: GPL
+RoxygenNote: 6.0.1
