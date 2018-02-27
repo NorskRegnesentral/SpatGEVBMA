@@ -258,9 +258,20 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   StationData <- list()
   StationData$Y.list <- Y.list
   StationData$X <- X
-  StationData$S <- S
-  
-  
+
+  ## Normalize distances
+  ## Basically UTM distances are large in magnitude and therefore
+  ## Cause numerical underflow with the exponential covariace function
+  ## This just gets them small enough to not be problematic
+  if(coordinate.type == "XY")
+    {
+      StationData$S <- S/1e4
+    }else{
+      StationData$S <- S
+    }
+
+  ## Save stations data
+  save(StationData, file = paste0(output.folder,"/StationData.RData"))  ##
   
   ## Go ahead and save the data lists here as individual files with their names corresponding to the 
   # name of the file.
@@ -360,8 +371,13 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   cov <- cov[-ww.na,]
   cov.map <- cbind(1,cov)
   colnames(cov.map) <- c("",names(gridData$covariates))
-  
-  S.map <- as.matrix(gridData$coordinates)
+
+  if(coordinate.type == "XY")
+  {
+    S.map <- as.matrix(gridData$coordinates) / 1e4 ## See above where StationData$S is formed
+  }else{
+    S.map <- as.matrix(gridData$coordinates)
+  }
   S.map <- S.map[-ww.na,]
   
   N <- dim(cov.map)[1]
