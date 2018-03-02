@@ -410,6 +410,8 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   Z.p <- array(data = unlist(l),dim = c(length(return.period),length(all.post.quantiles),N))
   Param.maps <- array(data = unlist(l_param),dim = c(3,length(all.post.quantiles),N))
   save(Z.p, Param.maps, file = paste0(output.folder,"/imputation.RData"))
+
+  ## START HERE
   
   if (testing)
     {
@@ -486,9 +488,10 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   
   ## Define the dimensions
   if (coordinate.type=="XY")
+  {
+    if (is.null(transform.output))
     {
-    if (is.null(transform.output)){
-
+      
       output.x <- indX
       output.y <- indY
       
@@ -509,8 +512,8 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
       dim.list <- list(Lon=x.ncdf,Lat=y.ncdf)
       
     }
-
-    }
+    
+  }
   
   if (coordinate.type=="LatLon")
     {
@@ -529,84 +532,98 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   {
     ## Just general definitions
     shortName <- paste("quant_",gsub(".","_",post.quantiles,fixed=TRUE),sep="")  # The gsub thing replaces the dot with a underscore
-    longName <- paste(post.quantiles," quantile of the marginal",
+    longName <- paste(post.quantiles," quantile of the marginal ",
                       "posterior distribution for the maximum precipition over ",
                       return.period[j]," years based on data: ",
                       annualMax.name,".",sep="")
-    
     w_median = which(post.quantiles == 0.5)
     if(length(w_median) > 0)
     {
-      longName[w_median] <- paste("Median of the marginal posterior",
+      longName[w_median] <- paste("Median of the marginal posterior ",
                                   "distribution for the ",return.period[j],
                                   " return level for precipitation based on data: ",
                                   annualMax.name,".",sep="")
-      }
+    }
       
-    IQRLongName <- paste("Interquartile range uncertainty measure: Difference",
-                         "between 0.75-quantile and 0.25-quantile for",
+    IQRLongName <- paste("Interquartile range uncertainty measure: Difference" ,
+                         "between 0.75-quantile and 0.25-quantile for ",
                          "the maximum precipitaion over ",
                          return.period[j], " years based on data: ",
                          annualMax.name,".",sep="")
   
-    filename.nc <- file.path(output.folder,"posterior.grid")
-    output.name <- paste(filename.nc,"_return_",return.period[j],".nc",sep="")
+    filename.nc <- paste0(output.folder,"/posterior.grid_return_",return.period[j],".nc",sep="")
+    filename.pdf <- paste0(output.folder,paste("/posterior.return.level.",return.period[j],"grid.pdf",sep=""))
 
-    vars=ncvar_defList
+    main.quantile = paste("Posterior ", post.quantiles, "-quantile \n ", return.period[j]," year return value with ", annualMax.name," data",sep="")
+    main.iqr = paste("Interquartile range uncertainty plot \n ", return.period[j]," year return value with ", annualMax.name," data",sep="")
+    output.name <- paste(filename.nc,"_return_",return.period[j],".nc",sep="")
 
     print_map(Q = Z.p[j,,],
               shortName = shortName,
               longName = longName,
               post.quantiles = post.quantiles,
-              IRQLongName = IRQLongName,
-              short.uncertainty = TRUE,
+              IQRLongName = IQRLongName,
+              show.uncertainty = TRUE,
               ww.na = ww.na,
               n = n,
+              output.x = output.x,
+              output.y = output.y,
               output.name = output.name,
+              filename.nc = filename.nc,
+              filename.pdf = filename.pdf,
+              main.quantile = main.quantile,
+              main.iqr = main.iqr,
               nx = nx,
               ny = ny)
   }
 
   ## Print out the parameter maps
-  nms_params = c("Location","Inverse Scale","Shape")
-  for(j in 1:3)
+  nms_param = c("Location","Inverse Scale","Shape")
+  for(j in 1:length(nms_param))
   {
     ## Just general definitions
     shortName <- paste("quant_",gsub(".","_",post.quantiles,fixed=TRUE),sep="")  # The gsub thing replaces the dot with a underscore
-    longName <- paste(post.quantiles," quantile of the marginal",
-                      "posterior distribution for the parameter",nms_param[j],
-                      "based on data:",
+    longName <- paste(post.quantiles," quantile of the marginal ",
+                      "posterior distribution for the ", nms_param[j], " parameter",
+                      " based on data:",
                       annualMax.name,".",sep="")
     
     w_median = which(post.quantiles == 0.5)
     if(length(w_median) > 0)
     {
       longName[w_median] <- paste("Median of the marginal",
-                                  "posterior distribution for the parameter",nms_param[j],
+                                  "posterior distribution for the ", nms_param[j], " parameter ",
                                   "based on data:",
                                   annualMax.name,".",sep="")
     }
       
-    IQRLongName <- paste("Interquartile range uncertainty measure: Difference",
-                         "between 0.75-quantile and 0.25-quantile for",
-                         "the parameter", nms_param[j],
+    IQRLongName <- paste("Interquartile range uncertainty measure: Difference ",
+                         "between 0.75-quantile and 0.25-quantile for ",
+                         "the ", nms_param[j], " parameter ",
                          "based on data: ",
                          annualMax.name,".",sep="")
   
-    filename.nc <- file.path(output.folder,"posterior.grid")
-    output.name <- paste(filename.nc,"_param_",nms_param[j],".nc",sep="")
+    filename.nc <- paste0(output.folder,"/posterior.grid_param_", nms_param[j],".nc",sep="")
+    filename.pdf <- paste0(output.folder,"/posterior.param.", nms_param[j],".grid.pdf",sep="")
 
-    vars=ncvar_defList
+    main.quantile = paste("Posterior ", post.quantiles, "-quantile \n ", "For ", nms_param[j], " parameter with ", annualMax.name," data",sep="")
+    main.iqr = paste("Interquartile range uncertainty plot \n ", "For ", nms_param[j], " parameter with ", annualMax.name," data",sep="")
 
     print_map(Q = Param.maps[j,,],
               shortName = shortName,
               longName = longName,
               post.quantiles = post.quantiles,
-              IRQLongName = IRQLongName,
-              short.uncertainty = TRUE,
+              IQRLongName = IQRLongName,
+              show.uncertainty = TRUE,
               ww.na = ww.na,
               n = n,
+              output.x = output.x,
+              output.y = output.y,
               output.name = output.name,
+              filename.nc = filename.nc,
+              filename.pdf = filename.pdf,
+              main.quantile = main.quantile,
+              main.iqr = main.iqr,
               nx = nx,
               ny = ny)
 
