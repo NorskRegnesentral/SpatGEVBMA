@@ -23,59 +23,58 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
                             testing = FALSE, # Variable indicating whether the run is a test or not. FALSE indicates no testing, a positive number indicates the number of locations being imputed
                             seed = 123, # The seed used in the mcmc computations
                             fixed.xi = NULL) # Where we want the shape parameter fixed
-
-
-  ## Various initial fixing
-  {
-  if (!requireNamespace("XLConnect", quietly = TRUE)) {
-    stop("XLConnect needed for this function to work. Please install it.",
-         call. = FALSE)
-  }
+{
   
-  # Bookeeping for storing intermediate results
+  ## Various initial fixing
+  if (!requireNamespace("XLConnect", quietly = TRUE))
+  {
+    stop("XLConnect needed for this function to work. Please install it.",call = FALSE)
+  }
+
+  ## Bookeeping for storing intermediate results
   initial.ls <- ls()  # To be used to subtract globally specified variables when saving intermediate variables
   input.list <- names(formals(SpatGEVBMA.wrapper)) # Want to keep the input variables
-    
+  
   output.folder <- file.path(output.path,output.folder.name)
   output.temp.folder <- file.path(output.path,output.folder.name,"Temp")
 
   if (show.uncertainty)
-    {
-      all.post.quantiles <- c(post.quantiles,c(0.25,0.75))   # The use of sort and unique here messes up things below, so avoid using it.
-    }
+  {
+    all.post.quantiles <- c(post.quantiles,c(0.25,0.75))   # The use of sort and unique here messes up things below, so avoid using it.
+  }
   
   ## Initial handling of directories
-
-  # Checks if output directory exists, if not it creates it  
+  
+  ## Checks if output directory exists, if not it creates it  
   dirs <- list.dirs(output.path,full.name=FALSE,recursive=FALSE)
   if (!(output.folder.name %in% dirs))
-    {
-      dir.create(output.folder)
-    }
-
-  # The same with the Temp folder 
+  {
+    dir.create(output.folder)
+  }
+  
+  ## The same with the Temp folder 
   dirs0 <- list.dirs(output.folder,full.name=FALSE,recursive=FALSE)
   if (!("Temp" %in% dirs0))
-    {
-      dir.create(output.temp.folder)
-    }
-
-  # Saving the input variables
+  {
+    dir.create(output.temp.folder)
+  }
+  
+  ## Saving the input variables
   save(list=input.list,file=file.path(output.folder,"input_var.RData"))
   
   if (create.tempfiles)
-    {
-      ## Saving intermediate values to easily continue from here if bugs occurs
-      current.ls <- ls()
-      keep.var <- unique(c(current.ls[!(current.ls %in% initial.ls)],input.list))
-      save(list=keep.var,file=file.path(output.temp.folder,"temp_checkpoint_0.RData")) 
-      ## Here we could delete variables which are not to be used below, to save RAM
-    }
+  {
+    ## Saving intermediate values to easily continue from here if bugs occurs
+    current.ls <- ls()
+    keep.var <- unique(c(current.ls[!(current.ls %in% initial.ls)],input.list))
+    save(list=keep.var,file=file.path(output.temp.folder,"temp_checkpoint_0.RData")) 
+    ## Here we could delete variables which are not to be used below, to save RAM
+  }
   
   cat("\nCheckpoint 0: Finished initialization.\n")
   
-  # Checkpoint 0
-    
+  ## Checkpoint 0
+  
   ## Reading in grid covariates
   cov.files <- list.files(covariates.folder,pattern = "*.nc")
   cov.files.path <- list.files(covariates.folder,pattern = "*.nc",full.names=TRUE)
@@ -83,31 +82,32 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   a <- list()
   nm <- NULL
   for(i in 1:length(cov.files))
+  {
+    a0 <-   nc_open(cov.files.path[i]) 
+    a[[i]] <- list()
+    if (coordinate.type=="XY")
     {
-      a0 <-   nc_open(cov.files.path[i]) 
-      a[[i]] <- list()
-      if (coordinate.type=="XY")
-        {
-          a[[i]]$x <- a0$dim$X$vals
-          a[[i]]$y <- a0$dim$Y$vals
-        }
-      if (coordinate.type=="LatLon")
-        {
-          a[[i]]$x <- a0$dim$Lon$vals
-          a[[i]]$y <- a0$dim$Lat$vals
-        }
-      ## Sorting the variables such that the appear in increasing coordinate order (fields default)
-      order.y <- length(a[[i]]$y):1
-      a[[i]]$y <- a[[i]]$y[order.y]
-      
-      a[[i]]$z <- ncvar_get(a0)[,order.y]
-      nc_close(a0)
-      nm[i] <- strsplit(cov.files[i],".",fixed=TRUE)[[1]][1]
-      
-      cat(paste("Finished reading ",i," of ",length(cov.files)," covariate files.\n",sep=""))
+      a[[i]]$x <- a0$dim$X$vals
+      a[[i]]$y <- a0$dim$Y$vals
     }
+    
+    if (coordinate.type=="LatLon")
+    {
+      a[[i]]$x <- a0$dim$Lon$vals
+      a[[i]]$y <- a0$dim$Lat$vals
+    }
+    ## Sorting the variables such that the appear in increasing coordinate order (fields default)
+    order.y <- length(a[[i]]$y):1
+    a[[i]]$y <- a[[i]]$y[order.y]
+    
+    a[[i]]$z <- ncvar_get(a0)[,order.y]
+    nc_close(a0)
+    nm[i] <- strsplit(cov.files[i],".",fixed=TRUE)[[1]][1]
+    
+    cat(paste("Finished reading ",i," of ",length(cov.files)," covariate files.\n",sep=""))
+  }
 
-
+  
   indX <- a[[1]]$x
   indY <- a[[1]]$y
   
@@ -388,19 +388,28 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   ##### Additional layer simply for testing purposes
 
   if (testing)
-    {
-      N0 <- testing
-      N <- N0
+  {
+    N0 <- testing
+    N <- N0
   }
   
   RNGkind("L'Ecuyer-CMRG") # In order to get the same 
   
-  l <- mclapply(1:N, "imputation.func", mc.cores = cores, mc.silent=FALSE,
-                cov.map=cov.map,S.map=S.map,R=R,sigma.22.inv=sigma.22.inv,
-                sigma.22.inv.tau=sigma.22.inv.tau,return.period=return.period,
-                all.post.quantiles=all.post.quantiles,N=N)
+  l_all <- mclapply(1:N, "imputation.func", mc.cores = cores, mc.silent=FALSE,
+                    cov.map=cov.map,S.map=S.map,R=R,sigma.22.inv=sigma.22.inv,
+                    sigma.22.inv.tau=sigma.22.inv.tau,return.period=return.period,
+                    all.post.quantiles=all.post.quantiles,N=N)
+  l = list()
+  l_param = list()
+  for(i in 1:length(l_all))
+  {
+    l[[i]] = l_all[[i]]$Q
+    l_param[[i]] = l_all[[i]]$P_Q
+  }
   
-  Z.p <- array(data = unlist(l),dim = c(length(return.period),length(all.post.quantiles),N)) ## TEst this
+  Z.p <- array(data = unlist(l),dim = c(length(return.period),length(all.post.quantiles),N))
+  Param.maps <- array(data = unlist(l_param),dim = c(3,length(all.post.quantiles),N))
+  save(Z.p, Param.maps, file = paste0(output.folder,"/imputation.RData"))
   
   if (testing)
     {
@@ -513,123 +522,95 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
       dim.list <- list(Lon=x.ncdf,Lat=y.ncdf)
     }
   
-  ncvar_defList <- list()
 
+
+  ##  Print Return Period Maps 
   for(j in 1:length(return.period))
+  {
+    ## Just general definitions
+    shortName <- paste("quant_",gsub(".","_",post.quantiles,fixed=TRUE),sep="")  # The gsub thing replaces the dot with a underscore
+    longName <- paste(post.quantiles," quantile of the marginal",
+                      "posterior distribution for the maximum precipition over ",
+                      return.period[j]," years based on data: ",
+                      annualMax.name,".",sep="")
+    
+    w_median = which(post.quantiles == 0.5)
+    if(length(w_median) > 0)
     {
-      ## Just general definitions
-      shortName <- paste("quant_",gsub(".","_",post.quantiles,fixed=TRUE),sep="")  # The gsub thing replaces the dot with a underscore
-      longName <- paste(post.quantiles," quantile of the marginal posterior distribution for the maximum precipition over ",return.period[j]," years based on data: ",
-                        annualMax.name,".",sep="")
-      
-      ## Default variables attributes
-      output.unit = "millimeter"  
-      output.missval <- -999.99
-      output.chunksizes <- c(length(output.x)/3,length(output.y)/3)
-      
-                                        # Default global attributes  
-      output.references <- "Output from the the SpatGEVBMA.wrapper function in the R-package SpatGEVBMA, developed in Dyrrdal, A. V. et al. (2015)"
-      output.referencesRpackage <- "https://github.com/NorskRegnesentral/SpatGEVBMA"
-      output.referencesPaper <- "Dyrrdal, A. V., Lenkoski, A., Thorarinsdottir, T. L., & Stordal, F. (2015). Bayesian hierarchical modeling of extreme hourly precipitation in Norway. Environmetrics, 26(2), 89-106."
-      output.var.version <- "no.version"  
-                                        #output.proj4.string <- "+proj=utm+zone=33+ellps=WGS84"  # MJ: This shouldn't really be hardcoded...
-      output.prod.date = substr(Sys.time(), 1, 10)
-                                        #output.conventions = "CF-1.4"
-      output.institution = "Norwegian Computing Center (Norsk Regnesentral)"
-      
-      for (i in 1:length(post.quantiles))
-        {
-          if (post.quantiles[i]==0.5)
-            {
-              longName[i] <- paste("Median of the marginal posterior distribution for the ",return.period[j]," return level for precipitation based on data: ",annualMax.name,".",sep="")
-            }
-          ncvar_defList[[i]] <- ncvar_def(name=shortName[i],longname=longName[i],
-                                          units=output.unit,
-                                          dim=dim.list,
-                                          missval=output.missval, # How missing values in input data are defined 
-                                          chunksizes = output.chunksizes)
-        }
-      IQRLongName <- paste("Interquartile range uncertainty measure: Difference between 0.75-quantile and 0.25-quantile for the maximum precipitaion over ",
-                           return.period[j]," years based on data: ",annualMax.name,".",sep="")
-      if (show.uncertainty)
-        {
-          this.IQR <- length(post.quantiles)+1
-          shortName <- c(shortName,"IQR")
-          longName <- c(longName,IQRLongName)
-          ncvar_defList[[this.IQR]] <- ncvar_def(name=shortName[this.IQR],longname=longName[this.IQR],
-                                                 units=output.unit,
-                                                 dim=dim.list,
-                                                 missval=output.missval, # How missing values in input data are defined 
-                                                 chunksizes = output.chunksizes)
-        }
-
-      notNA <- which(!(1:n %in% ww.na))
-  
-      full.Z.p <- matrix(NA,ncol=n,nrow=length(all.post.quantiles))
-      full.Z.p[,notNA] <- Z.p[j,,]
-  
-      filename.nc <- file.path(output.folder,"posterior.grid")
-      outputNc <- nc_create(filename=paste(filename.nc,"_return_",return.period[j],".nc",sep=""),vars=ncvar_defList)
-      retMat.quant=list()
-      for (r in 1:length(post.quantiles))
-        {
-        retMat.quant[[r]] <- matrix(full.Z.p[r,], ncol=ny,nrow=nx)
-        if (!is.null(transform.output)){
-          original.image$z <- retMat.quant[[r]]
-          interp.values <- interp.surface(obj=original.image, loc=XYGrid)
-          retMat.quant[[r]] <- matrix(interp.values, ncol=ny,nrow=nx,byrow=T)
-        }
-          ncvar_put(outputNc,varid=ncvar_defList[[r]],vals=c(retMat.quant[[r]][,ny:1]))  ##check
-        }
-      if (show.uncertainty)
-        {
-          retMat.IQR <- matrix(full.Z.p[this.IQR+1,]-full.Z.p[this.IQR,],ncol=ny,nrow=nx) # This part of full.Z.p is not transformed above
-          if (!is.null(transform.output)){
-            original.image$z <- retMat.IQR
-            interp.values <- interp.surface(obj=original.image, loc=XYGrid)
-            retMat.IQR <- matrix(interp.values, ncol=ny,nrow=nx,byrow=T)
-          }
-          ncvar_put(outputNc,varid=ncvar_defList[[this.IQR]],vals=c(retMat.IQR[,ny:1]))
-        }
-  
-      ## Putting global attributes to the nc-file:
-      ## Default global attributes  
-      ncatt_put(outputNc,varid=0, attname = "references", attval = output.references)
-      ncatt_put(outputNc,varid=0, attname = "Rpackage", attval = output.referencesRpackage)
-      ncatt_put(outputNc,varid=0, attname = "Paper", attval = output.referencesPaper)
-      ncatt_put(outputNc,varid=0, attname = "var.version", attval = output.var.version)
-      ##ncatt_put(outputNc,varid=0, attname = "proj4.string", attval = output.proj4.string)
-      ncatt_put(outputNc,varid=0, attname = "prod.date", attval = output.prod.date)
-      ##ncatt_put(outputNc,varid=0, attname = "conventions", attval = output.conventions)
-      ncatt_put(outputNc,varid=0, attname = "institution", attval = output.institution)
-  
-      nc_close(outputNc)
-
-      if (coordinate.type=="XY"){
-        if (is.null(transform.output)){
-          lab.name=c("x-coord","y-coord")
-        } else {
-          lab.name=c("Lon","Lat")
-        }
+      longName[w_median] <- paste("Median of the marginal posterior",
+                                  "distribution for the ",return.period[j],
+                                  " return level for precipitation based on data: ",
+                                  annualMax.name,".",sep="")
       }
-      if (coordinate.type=="LatLon"){
-        lab.name=c("Lon","Lat")
-      }
-      filename.pdf <- file.path(output.folder,paste("posterior.return.level.",return.period[j],"grid.pdf",sep=""))
-      pdf(filename.pdf,width=7, height=7)
-      for (r in 1:length(post.quantiles))
-        {
-          image.plot(output.x,output.y,retMat.quant[[r]],main=paste("Posterior ", post.quantiles[r], "-quantile \n ", return.period[j]," year return value with ", annualMax.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
-          points(S[,1],S[,2])
-        }
-      if (show.uncertainty)
-        {
-          image.plot(output.x,output.y,retMat.IQR,main=paste("Interquartile range uncertainty plot \n ", return.period[j]," year return value with ", annualMax.name," data",sep=""),xlab=lab.name[1],ylab=lab.name[2])
-          points(S[,1],S[,2])
-        }
-      dev.off()
+      
+    IQRLongName <- paste("Interquartile range uncertainty measure: Difference",
+                         "between 0.75-quantile and 0.25-quantile for",
+                         "the maximum precipitaion over ",
+                         return.period[j], " years based on data: ",
+                         annualMax.name,".",sep="")
+  
+    filename.nc <- file.path(output.folder,"posterior.grid")
+    output.name <- paste(filename.nc,"_return_",return.period[j],".nc",sep="")
+
+    vars=ncvar_defList
+
+    print_map(Q = Z.p[j,,],
+              shortName = shortName,
+              longName = longName,
+              post.quantiles = post.quantiles,
+              IRQLongName = IRQLongName,
+              short.uncertainty = TRUE,
+              ww.na = ww.na,
+              n = n,
+              output.name = output.name,
+              nx = nx,
+              ny = ny)
+  }
+
+  ## Print out the parameter maps
+  nms_params = c("Location","Inverse Scale","Shape")
+  for(j in 1:3)
+  {
+    ## Just general definitions
+    shortName <- paste("quant_",gsub(".","_",post.quantiles,fixed=TRUE),sep="")  # The gsub thing replaces the dot with a underscore
+    longName <- paste(post.quantiles," quantile of the marginal",
+                      "posterior distribution for the parameter",nms_param[j],
+                      "based on data:",
+                      annualMax.name,".",sep="")
+    
+    w_median = which(post.quantiles == 0.5)
+    if(length(w_median) > 0)
+    {
+      longName[w_median] <- paste("Median of the marginal",
+                                  "posterior distribution for the parameter",nms_param[j],
+                                  "based on data:",
+                                  annualMax.name,".",sep="")
     }
+      
+    IQRLongName <- paste("Interquartile range uncertainty measure: Difference",
+                         "between 0.75-quantile and 0.25-quantile for",
+                         "the parameter", nms_param[j],
+                         "based on data: ",
+                         annualMax.name,".",sep="")
+  
+    filename.nc <- file.path(output.folder,"posterior.grid")
+    output.name <- paste(filename.nc,"_param_",nms_param[j],".nc",sep="")
 
+    vars=ncvar_defList
+
+    print_map(Q = Param.maps[j,,],
+              shortName = shortName,
+              longName = longName,
+              post.quantiles = post.quantiles,
+              IRQLongName = IRQLongName,
+              short.uncertainty = TRUE,
+              ww.na = ww.na,
+              n = n,
+              output.name = output.name,
+              nx = nx,
+              ny = ny)
+
+  }
     
   # Finally save all R objects if desired
   if (save.all.output)
@@ -758,10 +739,15 @@ imputation.func <- function(i,cov.map,S.map,R,sigma.22.inv,sigma.22.inv.tau,retu
   n.return <- length(return.period)
   n.q <- length(all.post.quantiles)
   Q <- matrix(NA,n.return, n.q)
-
+  P_Q <- matrix(NA,3,n.q) ## Quantiles of the parameter sets
   X.drop <- cov.map[i,]
   S.drop <- S.map[i,,drop=FALSE]
   P <- gev.impute.params(R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau)
+
+  for(k in 1:3)
+  {
+    P_Q[k,] <- quantile(P[,k], all.post.quantiles)
+  }
   
   for(j in 1:length(return.period))
     {
@@ -770,6 +756,6 @@ imputation.func <- function(i,cov.map,S.map,R,sigma.22.inv,sigma.22.inv.tau,retu
     }
   
   if(i %% 10 == 0)print(paste(round(i/N*100,2), " % of imputation complete.",sep=""))
-  return(Q)
+  return(list(Q = Q, P_Q = P_Q))
 }
 
