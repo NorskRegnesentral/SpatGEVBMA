@@ -574,7 +574,8 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
               main.quantile = main.quantile,
               main.iqr = main.iqr,
               nx = nx,
-              ny = ny)
+              ny = ny,
+              dim.list = dim.list)
   }
 
   ## Print out the parameter maps
@@ -625,7 +626,8 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
               main.quantile = main.quantile,
               main.iqr = main.iqr,
               nx = nx,
-              ny = ny)
+              ny = ny,
+              dim.list = dim.list)
 
   }
     
