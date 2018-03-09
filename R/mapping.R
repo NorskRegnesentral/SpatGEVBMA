@@ -14,7 +14,8 @@ print_map = function(Q,
                      main.quantile,
                      main.iqr,
                      nx,
-                     ny)
+                     ny,
+                     dim.list)
 {
   ## Default variables attributes
   output.unit = "millimeter"  
