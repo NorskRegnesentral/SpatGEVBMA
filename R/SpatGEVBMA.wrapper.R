@@ -575,7 +575,14 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
               main.iqr = main.iqr,
               nx = nx,
               ny = ny,
-              dim.list = dim.list)
+              dim.list = dim.list,
+              all.post.quantiles = all.post.quantiles,
+              transform.output = transform.output,
+              original.image = original.image,
+              XYGrid = XYGrid,
+              coordinate.type = coordinate.type,
+              S = S)
+
   }
 
   ## Print out the parameter maps
@@ -627,8 +634,13 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
               main.iqr = main.iqr,
               nx = nx,
               ny = ny,
-              dim.list = dim.list)
-
+              dim.list = dim.list,
+              all.post.quantiles = all.post.quantiles,
+              transform.output = transform.output,
+              original.image = original.image,
+              XYGrid = XYGrid,
+              coordinate.type = coordinate.type,
+              S = S)
   }
     
   # Finally save all R objects if desired
