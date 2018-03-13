@@ -15,7 +15,13 @@ print_map = function(Q,
                      main.iqr,
                      nx,
                      ny,
-                     dim.list)
+                     dim.list,
+                     all.post.quantiles,
+                     transform.output,
+                     original.image,
+                     XYGrid,
+                     coordinate.type,
+                     S)
 {
   ## Default variables attributes
   output.unit = "millimeter"  
