@@ -1,0 +1,150 @@
+\documentclass[11pt,english]{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage{comment}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+%\usepackage{fancyhdr}
+%\usepackage{geometry}
+%\usepackage{helvet}
+%\usepackage{epsfig}
+%\usepackage{textcomp} % degree celsius
+\usepackage{natbib}
+%\usepackage{afterpage}
+\usepackage{amssymb}
+\usepackage{subfigure}
+\usepackage{float}
+\usepackage{tabularx}
+\usepackage{multirow}
+%\usepackage[footnotesize,sl]{caption}
+%\usepackage{pdfpages}
+%\usepackage{enumerate}
+%\usepackage{babel}
+\usepackage{lineno}
+
+\usepackage{color, colortbl}
+%\usepackage{draftwatermark}
+%\usepackage{caption}
+%\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{array}
+\usepackage{url}
+\usepackage{booktabs}
+%\captionsetup{labelformat=empty}
+\definecolor{Gray}{gray}{0.88}
+\definecolor{DarkGray}{gray}{0.7}
+
+%\geometry{verbose,a4paper,tmargin=20mm,bmargin=17mm,lmargin=17mm,rmargin=17mm}
+
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\real}{\mathbb{R}}
+\newcommand{\sS}{\mc{S}}
+\newcommand{\bX}{\bs{X}}
+\newcommand{\bY}{\bs{Y}} 
+\newcommand{\GP}{\mc{G}\mc{P}}
+\newcommand{\pderiv}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pderivsq}[1]{\frac{\partial^2}{(\partial #1)^2}}
+\newcommand{\bl}{\begin{linenomath}} 
+\newcommand{\el}{\end{linenomath}} 
+
+
+\setcounter{secnumdepth}{4} 
+%%\linenumbers
+\linespread{1.3}
+\begin{document}
+\section{Methods}\label{sec:modeling}
+
+\subsection{Likelihood Review}
+Let $\mathcal{S}$ denote the spatial region of interest (e.g. Norway) and $s\in\mathcal{S}$ a specific site in this region.  Let $y_{ts}$ follow a GEV distribution with spatially dependent parameters, 
+\bl\[
+y_{ts} \sim \text{GEV}(\mu_s,\sigma_s,\xi_s). 
+\]\el
+That is, the density of $y_{ts}$ is given by 
+\bl\begin{equation}\label{eq:gev_density}
+pr(y_{ts}| \mu_s, \kappa_s, \xi_s) = \kappa_s h(y_{ts})^{-(\xi_s + 1)/\xi_s} \exp \Big( - h(y_{ts})^{-\xi_s^{-1}}\Big), 
+\end{equation}\el
+for $h(y_{ts}) > 0$ with 
+\bl\[
+h(y_{ts}) = 1 + \xi_s \kappa_s (y_{ts} - \mu_s).
+\]\el
+
+\subsection{The constrained shape hierarchical model}\label{sec:gp}
+
+Each location $s \in\mathcal{S}$ has its own set of parameters $(\mu_s, \kappa_s, \xi_s)$.  The spatial variability is the result of a number of factors related to the variation in terrain and climate.  To capture this information, we collect the additional covariates $\bs{x}_{s}$ listed in Table~\ref{tab:cov} which aim to incorporate these features.  The model for e.g. $\mu_s$ is then specified as
+\bl\begin{equation}
+\mu_s = \bs{x}^\top_s\bs{\theta}^{\mu} \label{eq:glm}, 
+\end{equation}\el
+and similarly for $\kappa_s$ and $\xi_s$. Here, we some elements of $\bs{\theta}^{\mu}$ may be structurally fixed at $0$ according to a model $M^{\mu}$ for a fixed model $M^\mu$. Overdispersion in the model is handled via the model
+\bl\begin{equation}\label{eq:mu model}
+\mu_s = \bs{x}^\top_s \bs{\theta}^\mu + \tau^{\mu}_s,
+\end{equation}\el
+where $\tau^\mu_S$ follows a Gaussian Process.  In addition, for the shape parameter $\xi_s$ we specific the model
+\begin{align*}
+  \xi_s^{*} &= \bs{x}_s^\xi \bs{\theta}^\xi + \tau^{\xi}_s\\
+  \xi_s &=  \left\{\begin{array}{ll}
+  \xi_u&\mbox{if }\xi^{*}_s > \xi_u\\
+  \xi^{*}_s&\mbox{if }\xi^{*}_s \in [\xi_l,\xi_u]\\
+  \xi_l&\mbox{if }\xi^{*}_s < \xi_l
+  \end{array}
+  \right.
+\end{align*}
+For the range $(\xi_l, \xi_u)$.
+
+This model imposes a conditional independence assumption on the full likelihood. Letting $\mathcal{Y}_o$ denote all observed responses, the likelihood satisfies
+\bl $$
+pr(\mathcal{Y}_o|\{\mu_s,\kappa_s,\xi^{*}_s\}_{s\in\mathcal{S}_o}) = \prod_{s\in\mathcal{S}_o}\prod_{t = 1}^{T_S} pr(y_{ts}|\mu_s,\kappa_s,\xi_s)
+$$\el
+
+Inference is performed via Markov chain Monte Carlo (MCMC) under the model in \eqref{eq:full model} where each component of the model is updated in turn.  The joint update of the regression parameters $\bs{\theta}^\nu$ and the model $M_\nu$ for $\nu \in \{ \mu, \kappa, \xi\}$ is discussed in the next section.  The updates for the Gaussian processes $\{ \tau^\nu_s\}_{s \in \mathcal{S}_o}$ and the corresponding hyperparameters $\alpha^{\nu}$ and $\lambda^{\nu}$ for $\nu \in \{ \mu, \kappa, \xi\}$ together with the associated prior assumptions are discussed in the Appendix.  Here, we use second-order Taylor expansions of the log-likelihood of the model in \eqref{eq:gev_density} to construct Gaussian proposal densities, thereby eliminating the need for user-defined tuning parameters for the proposal distributions, see e.g. Chapter 4.4 of \cite{RueHeld2005}. The only nuance is the relationship between the uncensored $\xi^{*}_s$ and the likelihood, in particular when $\xi_s \not\in [\xi_l, \xi_u]$ then
+$$
+\frac{\partial}{\partial \xi_s^{*}} pr(Y_s|\mu_s, \kappa_s, \xi_s) = 0.
+$$
+which is an important feature of the updates for the overdispersion factors $\tau_s^{\xi}$
+
+\section{MCMC updates of the random effects and the related hyperparameters}
+
+Here, we discuss the MCMC updates of the Gaussian processes $\tau_s^\mu$, $\tau_s^\kappa$ and $\tau^\xi_s$ for each $s \in \mc{S}_o$ as well as the related hyperparameters $\alpha_\nu$ and $\lambda_\nu$ for $\nu \in \{ \mu, \kappa, \xi \}$. Most of these parameters require a Metropolis-Hastings update and the associated Hastings ratios \citep[e.g.][]{Hoff2009} can be calculated in a straight-forward manner.  That is, assume we want to update the parameter $\eta$ in our model, where $\eta$ is the current value. We then draw a new value $\eta'$ from a proposal distribution $pr(\eta' | \eta, \cdot)$ and accept the proposal with probability $\min \{ r, 1 \}$ where 
+\bl\[
+r = \frac{pr(\bs{y}| \eta', \cdot) pr(\eta' | \cdot) pr(\eta | \eta', \cdot)}{pr(\bs{y} | \eta, \cdot) pr (\eta| \cdot) pr(\eta' | \eta, \cdot)}.
+\]\el
+Here, $pr(\bs{y} | \eta, \cdot)$ denotes the likelihood of our full data set $\bs{y}$ which depends on $\eta$ and potentially other parameters which are kept fixed throughout, and $pr( \eta | \cdot)$ is the prior distribution of $\eta$ which similarly might depend on the other parts of the model.  Given the complexity of our model, it is vital to design efficient proposal distributions which return good proposals and are robust in that they do not require fine-tuning for each individual data set.  
+
+\subsection{Random effects}
+
+Under the Gaussian process model in \eqref{eq:GPmean} and \eqref{eq:GPcov}, the conditional distribution of $\tau_s$ (omitting the index $\nu$) conditional on the remaining values $\bs{\tau}_{\mc{S}_o \setminus s} = \{ \tau_{s'} \}_{s' \in \mc{S}_o \setminus s}$ is given by 
+\bl\begin{equation}\label{eq:tauPrior}
+\tau_s | \bs{\tau}_{\mc{S}_o \setminus s}, \alpha, \lambda \sim \mc{N} (\hat{\tau}_s, \varsigma_s),
+\end{equation}\el
+where 
+\bl\begin{align*}
+\hat{\tau}_s &= \mc{K}_{\alpha, \lambda}\big(s,\mc{S}_o\setminus s \big) \, \mc{K}^{-1}_{\alpha,\lambda}\big(\mc{S}_o\setminus s, \mc{S}_o\setminus s \big) \, \bs{\tau}_{\mc{S}_o\setminus s}\\
+\varsigma_s &= \mc{K}_{\alpha, \lambda}\big(s,s\big) - \mc{K}_{\alpha, \lambda}\big(s,\mc{S}_o\setminus s \big) \, \mc{K}^{-1}_{\alpha,\lambda}\big(\mc{S}_o\setminus s, \mc{S}_o\setminus s\big) \, \mc{K}_{\alpha, \lambda}\big(\mc{S}_o\setminus s,s\big).
+\end{align*}\el
+We use this distribution as the prior distribution for $\tau_s$. 
+
+For designing the proposal distribution, we employ the Gaussian approximation discussed, for instance, in Chapter 4.4 of \cite{RueHeld2005}.  Assume that the posterior distribution of the parameter $\tau'_s$ is written on the form
+\bl\[
+pr(\tau'_s| \cdot) \propto \exp \big( f(\tau'_s) \big),
+\]\el
+for some function $f$.  A quadratic Taylor expansion of the log-posterior $f(\tau'_s)$ around the value $\tau_s$ gives 
+\bl\begin{align*}
+f(\tau'_s) & \approx f(\tau_s) + f'(\tau_s) ( \tau'_s - \tau_s) + \frac{1}{2} f''(\tau_s) (\tau'_s - \tau_s)^2 \\
+& = a + b \tau'_s - \frac{1}{2} c (\tau'_s)^2, 
+\end{align*}\el
+where $b = f'(\tau_s) - f''(\tau_s) \tau_s$ and $c = -f''(\tau_s)$.  The posterior distribution $pr(\tau'_s | \cdot)$ may now be approximated by 
+\bl\[
+\widetilde{pr}(\tau'_s | \cdot) \propto \exp \Big( -\frac{1}{2} c (\tau'_s)^2 + b \tau'_s \Big), 
+\]\el 
+the denisty of the Gaussian distribution $\mc{N}(b/c, c^{-1})$. We thus choose $\mc{N}(b/c, c^{-1})$ as our proposal distribution, where $\tau_s$ is the current state of the MCMC chain.  From \eqref{eq:tauPrior} it follows that 
+\bl\begin{align*}
+f'(\tau_s) &= \sum_{t = 1}^{T_s} \pderiv{}{\tau_s} \log pr(y_{ts}|\tau_s, \cdot) - \frac{\tau_s - \hat{\tau}_s}{\varsigma_s}\\
+f''(\tau_s) &= \sum_{t = 1}^{T_s} \pderivsq{\tau_s} \log pr(y_{ts}|\tau_s, \cdot) - \frac{1}{\varsigma_s},
+\end{align*}\el 
+However, note that for $\xi$ we have
+\bl\begin{align*}
+f'(\tau_s) &= \sum_{t = 1}^{T_s} \pderiv{}{\tau_s} \log pr(y_{ts}|\tau_s, \cdot)\mathbf{1}\{\xi^{*}_s \in [\xi_l,\xi_u]\}- \frac{\tau_s - \hat{\tau}_s}{\varsigma_s}\\
+f''(\tau_s) &= \sum_{t = 1}^{T_s} \pderivsq{\tau_s} \log pr(y_{ts}|\tau_s, \cdot)\mathbf{1}\{\xi^{*}_s \in [\xi_l,\xi_u]\} - \frac{1}{\varsigma_s},
+\end{align*}\el 
+All subsequent partial derivatives of the likelihood can then be found in the original paper.
+\end{document}
