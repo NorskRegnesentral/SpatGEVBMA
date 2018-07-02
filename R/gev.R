@@ -1207,14 +1207,14 @@ gev.impute <- function(R,X.drop, S.drop, burn = NULL, n.each = NULL,return.param
       {
         n.each <- round(1e6/reps) ##let's get about a million draws
       }
-    I <- (burn + 1):reps
-    Y <- matrix(0,length(I),n.each)
-    MU <- KAPPA <- XI <- rep(0,length(I))
+    Ind = (burn + 1):reps
+    Y <- matrix(0,nrow = length(Ind),ncol = n.each)
+    MU <- KAPPA <- XI <- rep(0,length(Ind))
     S.all <- rbind(S.drop, R$S)
     D.all <- make.D(S.all,S.all)
-    for(i in 1:length(I))
+    for(i in 1:length(Ind))
       {
-        it <- I[i]
+        it <- Ind[i]
         ##------------ Get mu_s --------------
         alpha <- R$ALPHA[it,1]
         lambda <- R$LAMBDA[it,1]
@@ -1276,7 +1276,6 @@ gev.impute <- function(R,X.drop, S.drop, burn = NULL, n.each = NULL,return.param
             varsigma <- 1/C.inv[1,1]
             tau.new <- rnorm(1,tau.hat,sd=sqrt(varsigma))
             xi.s <- sum(R$THETA[it,,3] * X.drop) + tau.new
-            ## HERE THERE IS A PROBLEM
             if(xi.s > xi.constrain[2]){
                 xi.s  = xi.constrain[2]
             }
