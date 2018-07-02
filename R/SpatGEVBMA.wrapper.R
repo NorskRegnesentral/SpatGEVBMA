@@ -22,7 +22,8 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
                             save.all.output = TRUE, # Logical indicating whether all R objects should be save to file upon function completion. Allocates approx 2.5 Gb for all of Norway.
                             testing = FALSE, # Variable indicating whether the run is a test or not. FALSE indicates no testing, a positive number indicates the number of locations being imputed
                             seed = 123, # The seed used in the mcmc computations
-                            fixed.xi = NULL) # Where we want the shape parameter fixed
+                            fixed.xi = NULL,  # Where we want the shape parameter fixed
+                            xi.constrain = c(-Inf,Inf))
 {
   
   ## Various initial fixing
@@ -313,7 +314,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   ##prior$xi$Omega.0 <- diag(p)##solve(diag(c(100,rep(100,dim(X.all)[2] - 1))))
   
   set.seed(seed)
-  R0 <- spatial.gev.bma(StationData$Y.list, StationData$X, as.matrix(StationData$S), mcmc.reps, prior, print.every = 1e2, fixed.xi = fixed.xi)
+  R0 <- spatial.gev.bma(StationData$Y.list, StationData$X, as.matrix(StationData$S), mcmc.reps, prior, print.every = 1e2, fixed.xi = fixed.xi, xi.constrain = xi.constrain)
 
   save(R0, file=paste(output.folder,"/mcmc.RData",sep=""))
   R <- R0  
@@ -398,7 +399,8 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   l_all <- mclapply(1:N, "imputation.func", mc.cores = cores, mc.silent=FALSE,
                     cov.map=cov.map,S.map=S.map,R=R,sigma.22.inv=sigma.22.inv,
                     sigma.22.inv.tau=sigma.22.inv.tau,return.period=return.period,
-                    all.post.quantiles=all.post.quantiles,N=N)
+                    all.post.quantiles=all.post.quantiles,N=N,
+                    xi.constrain = xi.constrain)
   l = list()
   l_param = list()
   for(i in 1:length(l_all))
@@ -764,7 +766,7 @@ gev.impute.params <- function (R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau
   return(P)
 }
 
-imputation.func <- function(i,cov.map,S.map,R,sigma.22.inv,sigma.22.inv.tau,return.period,all.post.quantiles,N)
+imputation.func <- function(i,cov.map,S.map,R,sigma.22.inv,sigma.22.inv.tau,return.period,all.post.quantiles,N,xi.constrain=c(-Inf,Inf))
 {
 
   n.return <- length(return.period)
@@ -773,7 +775,7 @@ imputation.func <- function(i,cov.map,S.map,R,sigma.22.inv,sigma.22.inv.tau,retu
   P_Q <- matrix(NA,3,n.q) ## Quantiles of the parameter sets
   X.drop <- cov.map[i,]
   S.drop <- S.map[i,,drop=FALSE]
-  P <- gev.impute.params(R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau)
+  P <- gev.impute.params(R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau, xi.constrain = xi.constrain)
 
   for(k in 1:3)
   {

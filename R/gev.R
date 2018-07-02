@@ -462,7 +462,7 @@ gev.update.tau.eta <- function(G)
 
 ##-------------- Updating Xi Random Effects -----------------------------------------------
 j.prime <- function(tau, tau.hat, varsigma, kappa, xi.hat, eps,
-                    censored = FALSE)	# Not in use
+                    censored = FALSE)	
   {
     h <- 1 + kappa * eps * (xi.hat + tau)
     if(any(h < 0))return(-Inf)
@@ -478,7 +478,7 @@ j.prime <- function(tau, tau.hat, varsigma, kappa, xi.hat, eps,
     return(res)
   }
 
-j.double.prime <- function(tau, tau.hat, varsigma, kappa, xi.hat, eps, censored = FALSE)	# Not in use
+j.double.prime <- function(tau, tau.hat, varsigma, kappa, xi.hat, eps, censored = FALSE)
   {
       h <- 1 + kappa * eps * (xi.hat + tau)
       if(any(h < 0))return(-Inf)
@@ -565,7 +565,7 @@ gev.update.tau.xi <- function(G)
                     d.new <- -jj.s
                     
                     xi.curr <- xi.hat + tau[s]
-                    if(xi.curr > G$xi.constrain[2])xi.curr = G$xi.constrain[2]
+                    if(xi.curr > G$xi.constrain[2]) xi.curr = G$xi.constrain[2]
                     if(xi.curr < G$xi.constrain[1]) xi.curr = G$xi.constrain[1]
                     xi.new <- xi.hat + tau.new
                     if(xi.new > G$xi.constrain[2]) xi.new = G$xi.constrain[2]
@@ -749,7 +749,7 @@ gp.like.lambda <- function(lambda, alpha, tau, D)
     return(-l)
   }
 
-gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log.kappa, xi.constraint)
+gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log.kappa, xi.constrain)
   {
     ## I literally have no idea how this function got so long.
     G <- NULL
@@ -997,7 +997,7 @@ gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log
         G$lambda.xi <- 1
       }else{
         G$fixed.xi <- FALSE
-        G$xi.constraint <- xi.constraint
+        G$xi.constrain <- xi.constrain
         xi.temp <- ML[,3]/5
         if(G$full)
           {
@@ -1276,6 +1276,7 @@ gev.impute <- function(R,X.drop, S.drop, burn = NULL, n.each = NULL,return.param
             varsigma <- 1/C.inv[1,1]
             tau.new <- rnorm(1,tau.hat,sd=sqrt(varsigma))
             xi.s <- sum(R$THETA[it,,3] * X.drop) + tau.new
+            ## HERE THERE IS A PROBLEM
             if(xi.s > xi.constrain[2]){
                 xi.s  = xi.constrain[2]
             }
