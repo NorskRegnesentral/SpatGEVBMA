@@ -195,40 +195,47 @@ gev.update.tau.mu <- function(G)
             }else{
                 kappa.s <- sum(G$theta.kappa * G$X[s,]) + G$tau.kappa[s]
             }
-        xi.s <- sum(G$theta.xi * G$X[s,]) + G$tau.xi[s]
-        tau.hat.s <- sum(-C.inv[s,-s]/C.inv[s,s] * tau[-s])
-        varsigma.s <- 1/C.inv[s,s] ##precision matrix stuff
+          xi.s <- sum(G$theta.xi * G$X[s,]) + G$tau.xi[s]
+          if(xi.s > G$xi.constrain[2]){
+              xi.s = G$xi.constrain[2]
+          }
+          if(xi.s < G$xi.constrain[1]){
+              xi.s = G$xi.constrain[1]
+          }
+          
+          tau.hat.s <- sum(-C.inv[s,-s]/C.inv[s,s] * tau[-s])
+          varsigma.s <- 1/C.inv[s,s] ##precision matrix stuff
 
-        f.s <- f_prime_new(tau[s], tau.hat.s, varsigma.s, xi.s, kappa.s, R.s)
-        ff.s <- f_double_prime_new(tau[s], tau.hat.s, varsigma.s, xi.s, kappa.s, R.s)
-        if(is.finite(f.s) && (ff.s < 0))
+          f.s <- f_prime_new(tau[s], tau.hat.s, varsigma.s, xi.s, kappa.s, R.s)
+          ff.s <- f_double_prime_new(tau[s], tau.hat.s, varsigma.s, xi.s, kappa.s, R.s)
+          if(is.finite(f.s) && (ff.s < 0))
           {
-            b <- f.s - ff.s * tau[s]
-            d <- -ff.s
-            tau.new <- rnorm(1, b/d, sd =sqrt(1/d))
-            
-            f.s <- f_prime_new(tau.new, tau.hat.s, varsigma.s, xi.s, kappa.s, R.s)
-            ff.s <- f_double_prime_new(tau.new, tau.hat.s, varsigma.s, xi.s, kappa.s, R.s)
-            if(is.finite(f.s) && (ff.s < 0))
+              b <- f.s - ff.s * tau[s]
+              d <- -ff.s
+              tau.new <- rnorm(1, b/d, sd =sqrt(1/d))
+              
+              f.s <- f_prime_new(tau.new, tau.hat.s, varsigma.s, xi.s, kappa.s, R.s)
+              ff.s <- f_double_prime_new(tau.new, tau.hat.s, varsigma.s, xi.s, kappa.s, R.s)
+              if(is.finite(f.s) && (ff.s < 0))
               {
-                b.new <- f.s - ff.s * tau.new
-                d.new <- -ff.s
-                
-                mu.curr <- sum(G$theta.mu * G$X[s,]) + tau[s]
-                mu.new <- sum(G$theta.mu * G$X[s,]) + tau.new
-                
-                L.curr <- sum(gev.like(G$Y.list[[s]], mu.curr, kappa.s, xi.s))
-                L.new <- sum(gev.like(G$Y.list[[s]], mu.new, kappa.s, xi.s))
-                prior.curr <- dnorm(tau[s], tau.hat.s, sd=sqrt(varsigma.s), log=TRUE)
-                prior.new <- dnorm(tau.new, tau.hat.s, sd=sqrt(varsigma.s), log=TRUE)
-                prop.curr <- dnorm(tau.new, b/d, sqrt(1/d), log=TRUE)
-                prop.new <- dnorm(tau[s], b.new/d.new, sqrt(1/d.new), log=TRUE)
-                
-                alpha <- L.new - L.curr + prior.new - prior.curr + prop.new - prop.curr
-                if(log(runif(1)) < alpha)
+                  b.new <- f.s - ff.s * tau.new
+                  d.new <- -ff.s
+                  
+                  mu.curr <- sum(G$theta.mu * G$X[s,]) + tau[s]
+                  mu.new <- sum(G$theta.mu * G$X[s,]) + tau.new
+                  
+                  L.curr <- sum(gev.like(G$Y.list[[s]], mu.curr, kappa.s, xi.s))
+                  L.new <- sum(gev.like(G$Y.list[[s]], mu.new, kappa.s, xi.s))
+                  prior.curr <- dnorm(tau[s], tau.hat.s, sd=sqrt(varsigma.s), log=TRUE)
+                  prior.new <- dnorm(tau.new, tau.hat.s, sd=sqrt(varsigma.s), log=TRUE)
+                  prop.curr <- dnorm(tau.new, b/d, sqrt(1/d), log=TRUE)
+                  prop.new <- dnorm(tau[s], b.new/d.new, sqrt(1/d.new), log=TRUE)
+                  
+                  alpha <- L.new - L.curr + prior.new - prior.curr + prop.new - prop.curr
+                  if(log(runif(1)) < alpha)
                   {
-                    G$accept.tau.mu[s] <- 1
-                    tau[s] <- tau.new
+                      G$accept.tau.mu[s] <- 1
+                      tau[s] <- tau.new
                   }
               }
           }
@@ -252,8 +259,8 @@ g.prime <- function(tau,tau.hat,varsigma,xi,kappa.hat,eps)	# Not in use
       if(any(h < 0))return(-Inf)
       L <- 1/(kappa.hat + tau) - (xi + 1) * eps * h^(-1) + eps * h^(-1/xi - 1)
      }
-	res <- sum(L) - (tau - tau.hat)/varsigma
-    return(res)
+   res <- sum(L) - (tau - tau.hat)/varsigma
+   return(res)
   }
 
 g.double.prime <- function(tau, tau.hat, varsigma, xi, kappa.hat, eps)	# Not in use
@@ -293,6 +300,12 @@ gev.update.tau.kappa <- function(G)
         eps.s <- Y.s - mu.s
         kappa.hat <- sum(G$theta.kappa * G$X[s,])
         xi.s <- sum(G$theta.xi * G$X[s,]) + G$tau.xi[s]
+        if(xi.s > G$xi.constrain[2]){
+            xi.s = G$xi.constrain[2]
+        }
+        if(any(xi.s < G$xi.constrain.xi[1])){
+            xi.s = G$xi.constrain[1]
+        }
 
         tau.hat.s <- sum(-C.inv[s,-s]/C.inv[s,s] * tau[-s])
         varsigma.s <- 1/C.inv[s,s] ##precision matrix stuff
@@ -395,6 +408,12 @@ gev.update.tau.eta <- function(G)
         eps.s <- Y.s - mu.s
         eta.hat <- sum(G$theta.eta * G$X[s,])
         xi.s <- sum(G$theta.xi * G$X[s,]) + G$tau.xi[s]
+        if(xi.s > G$xi.constrain[2]){
+            xi.s = G$xi.constrain[2]
+        }
+        if(xi.s < G$xi.contrain.xi[1]){
+            xi.s = G$xi.constrain[1]
+        }
 
         tau.hat.s <- sum(-C.inv[s,-s]/C.inv[s,s] * tau[-s])
         varsigma.s <- 1/C.inv[s,s] ##precision matrix stuff
@@ -442,7 +461,8 @@ gev.update.tau.eta <- function(G)
 ##----------------- End Updating Eta (log kappa) Random Effects -------------------------------------
 
 ##-------------- Updating Xi Random Effects -----------------------------------------------
-j.prime <- function(tau, tau.hat, varsigma, kappa, xi.hat, eps)	# Not in use
+j.prime <- function(tau, tau.hat, varsigma, kappa, xi.hat, eps,
+                    censored = FALSE)	
   {
     h <- 1 + kappa * eps * (xi.hat + tau)
     if(any(h < 0))return(-Inf)
@@ -450,11 +470,15 @@ j.prime <- function(tau, tau.hat, varsigma, kappa, xi.hat, eps)	# Not in use
     f.1.dot <- -log(h)/(xi.hat + tau)^2 + (xi.hat + tau + 1)/(xi.hat + tau) * h^(-1) * eps * kappa
     f.2 <-  exp(-(xi.hat + tau)^(-1) * log(h))
     f.2.dot <- f.2 * (log(h)/(xi.hat + tau)^2 - h^(-1) * eps * kappa / (xi.hat + tau) )
-    res <- -sum(f.1.dot) - sum(f.2.dot) - (tau - tau.hat)/varsigma
+    if(censored){
+        res = -(tau - tau.hat) / varsigma
+    }else{
+        res <- -sum(f.1.dot) - sum(f.2.dot) - (tau - tau.hat)/varsigma
+    }
     return(res)
   }
 
-j.double.prime <- function(tau, tau.hat, varsigma, kappa, xi.hat, eps)	# Not in use
+j.double.prime <- function(tau, tau.hat, varsigma, kappa, xi.hat, eps, censored = FALSE)
   {
       h <- 1 + kappa * eps * (xi.hat + tau)
       if(any(h < 0))return(-Inf)
@@ -471,7 +495,11 @@ j.double.prime <- function(tau, tau.hat, varsigma, kappa, xi.hat, eps)	# Not in 
       g.4.dot.1 <- f.2.dot * (h^(-1) * kappa * eps * (xi.hat + tau)^(-1))
       g.4.dot.2 <- -f.2 * eps * kappa * ( h^(-1) * (xi.hat + tau)^(-2) + h^(-2) * eps * kappa * (xi.hat + tau)^(-1) )
       g.4.dot <- g.4.dot.1 + g.4.dot.2
-      res <- sum(g.1.dot) - sum(g.2.dot) - sum(g.3.dot) + sum(g.4.dot) - 1/varsigma
+      if(censored){
+          res = -1 / varsigma
+      }else{
+          res <- sum(g.1.dot) - sum(g.2.dot) - sum(g.3.dot) + sum(g.4.dot) - 1/varsigma
+      }
       return(res)
   }
 
@@ -507,8 +535,14 @@ gev.update.tau.xi <- function(G)
         tau.hat.s <- sum(-C.inv[s,-s]/C.inv[s,s] * tau[-s])
         varsigma.s <- 1/C.inv[s,s] ##precision matrix stuff
 
-        j.s <- j_prime_new(tau[s], tau.hat.s, varsigma.s, kappa.s, xi.hat, eps.s)
-        jj.s <- j_double_prime_new(tau[s], tau.hat.s, varsigma.s, kappa.s, xi.hat, eps.s)
+        if( (xi.hat + tau[s] > G$xi.constrain[1]) & (xi.hat + tau[s] < G$xi.constrain[2])){
+            censored = FALSE
+        }else{
+            censored = TRUE
+        }
+
+        j.s <- j.prime(tau[s], tau.hat.s, varsigma.s, kappa.s, xi.hat, eps.s, censored)
+        jj.s <- j.double.prime(tau[s], tau.hat.s, varsigma.s, kappa.s, xi.hat, eps.s, censored)
         if(is.finite(j.s) && (jj.s < 0))
           {
             b <- j.s - jj.s * tau[s]
@@ -516,16 +550,26 @@ gev.update.tau.xi <- function(G)
             tau.new <- rnorm(1, b/d, sd =sqrt(1/d))
             temp <- 1 + kappa.s * (xi.hat + tau.new) * eps.s
             if(all(temp > 0))
-              {
-                j.s <- j_prime_new(tau.new, tau.hat.s, varsigma.s, kappa.s, xi.hat, eps.s)
-                jj.s <- j_double_prime_new(tau.new, tau.hat.s, varsigma.s, kappa.s, xi.hat, eps.s)
+            {
+                if( (xi.hat + tau.new > G$xi.constrain[1]) & (xi.hat + tau.new < G$xi.constrain[2])){
+                    censored = FALSE
+                }else{
+                    censored = TRUE
+                }
+
+                j.s <- j.prime(tau.new, tau.hat.s, varsigma.s, kappa.s, xi.hat, eps.s,censored)
+                jj.s <- j.double.prime(tau.new, tau.hat.s, varsigma.s, kappa.s, xi.hat, eps.s, censored)
                 if(is.finite(j.s) && (jj.s < 0))
                   {
                     b.new <- j.s - jj.s * tau.new
                     d.new <- -jj.s
                     
                     xi.curr <- xi.hat + tau[s]
+                    if(xi.curr > G$xi.constrain[2]) xi.curr = G$xi.constrain[2]
+                    if(xi.curr < G$xi.constrain[1]) xi.curr = G$xi.constrain[1]
                     xi.new <- xi.hat + tau.new
+                    if(xi.new > G$xi.constrain[2]) xi.new = G$xi.constrain[2]
+                    if(xi.new < G$xi.constrain[1]) xi.new = G$xi.constrain[1]
                     
                     L.curr <- sum(gev.like(G$Y.list[[s]], mu.s, kappa.s, xi.curr))
                     L.new <- sum(gev.like(G$Y.list[[s]], mu.s, kappa.s, xi.new))
@@ -705,7 +749,7 @@ gp.like.lambda <- function(lambda, alpha, tau, D)
     return(-l)
   }
 
-gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log.kappa)
+gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log.kappa, xi.constrain)
   {
     ## I literally have no idea how this function got so long.
     G <- NULL
@@ -953,6 +997,7 @@ gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log
         G$lambda.xi <- 1
       }else{
         G$fixed.xi <- FALSE
+        G$xi.constrain <- xi.constrain
         xi.temp <- ML[,3]/5
         if(G$full)
           {
@@ -1024,11 +1069,13 @@ gev.update <- function(G)
 
     ##----------- Mu Model -------------------------
     Y <- G$X %*% G$theta.mu + G$tau.mu
-    if(!G$full) {G$M.mu <- gev.update.M(Y,G$X,G$M.mu,G$alpha.mu,G$lambda.mu,G$D, G$prior$mu$beta.0, G$prior$mu$Omega.0,nonspatial=G$nonspatial)}
-    G$theta.mu <- gev.update.theta(Y,G$X,G$M.mu,G$alpha.mu,G$lambda.mu,G$D, G$prior$mu$beta.0, G$prior$mu$Omega.0,nonspatial=G$nonspatial) 
-    G$tau.mu <- Y - G$X %*% G$theta.mu
-    G <- gev.update.tau.mu(G)
-    ##----------------------------------------------
+      if(!G$full) {
+          G$M.mu <- gev.update.M(Y,G$X,G$M.mu,G$alpha.mu,G$lambda.mu,G$D, G$prior$mu$beta.0, G$prior$mu$Omega.0,nonspatial=G$nonspatial)
+      }
+      G$theta.mu <- gev.update.theta(Y,G$X,G$M.mu,G$alpha.mu,G$lambda.mu,G$D, G$prior$mu$beta.0, G$prior$mu$Omega.0,nonspatial=G$nonspatial) 
+      G$tau.mu <- Y - G$X %*% G$theta.mu
+      G <- gev.update.tau.mu(G)
+      ##----------------------------------------------
 
     ##---------- Kappa Model -----------------------
     if(G$log.kappa)
@@ -1152,7 +1199,7 @@ gev.logscore <- function(Y.obs, Y.samp)
     return(ls)
   }
 
-gev.impute <- function(R,X.drop, S.drop, burn = NULL, n.each = NULL,return.param=FALSE)
+gev.impute <- function(R,X.drop, S.drop, burn = NULL, n.each = NULL,return.param=FALSE, xi.constrain = c(-Inf,Inf))
   {
     reps <- dim(R$THETA)[1]
     if(is.null(burn))burn <- round(reps/10)
@@ -1160,14 +1207,14 @@ gev.impute <- function(R,X.drop, S.drop, burn = NULL, n.each = NULL,return.param
       {
         n.each <- round(1e6/reps) ##let's get about a million draws
       }
-    I <- (burn + 1):reps
-    Y <- matrix(0,length(I),n.each)
-    MU <- KAPPA <- XI <- rep(0,length(I))
+    Ind = (burn + 1):reps
+    Y <- matrix(0,nrow = length(Ind),ncol = n.each)
+    MU <- KAPPA <- XI <- rep(0,length(Ind))
     S.all <- rbind(S.drop, R$S)
     D.all <- make.D(S.all,S.all)
-    for(i in 1:length(I))
+    for(i in 1:length(Ind))
       {
-        it <- I[i]
+        it <- Ind[i]
         ##------------ Get mu_s --------------
         alpha <- R$ALPHA[it,1]
         lambda <- R$LAMBDA[it,1]
@@ -1229,6 +1276,12 @@ gev.impute <- function(R,X.drop, S.drop, burn = NULL, n.each = NULL,return.param
             varsigma <- 1/C.inv[1,1]
             tau.new <- rnorm(1,tau.hat,sd=sqrt(varsigma))
             xi.s <- sum(R$THETA[it,,3] * X.drop) + tau.new
+            if(xi.s > xi.constrain[2]){
+                xi.s  = xi.constrain[2]
+            }
+            if(xi.s < xi.constrain[1]){
+                xi.s = xi.constrain[1]
+            }
           }else{
             xi.s <- R$fixed.xi
           }
@@ -1245,14 +1298,32 @@ gev.impute <- function(R,X.drop, S.drop, burn = NULL, n.each = NULL,return.param
       return(as.vector(Y))
   }
 
-spatial.gev.bma <- function(Y.list, X.all,S,n.reps,prior.user= NULL, full = FALSE, fixed.xi = NULL, print.every=0,nonspatial=FALSE,log.kappa=FALSE)
+spatial.gev.bma <- function(Y.list,
+                            X.all,
+                            S,
+                            n.reps,
+                            prior.user= NULL,
+                            full = FALSE,
+                            fixed.xi = NULL,
+                            print.every=0,
+                            nonspatial=FALSE,
+                            log.kappa=FALSE,
+                            xi.constraint = c(-Inf,Inf))
   {
     ##---- Oh R --
     S <- as.matrix(S)
     ##-------------
     
     ##print("THIS IS THE NEW VERSION OF SpatialGEVBMA")
-    G <- gev.init(Y.list,X.all,S, prior.user,full,fixed.xi,nonspatial, log.kappa) 
+      G <- gev.init(Y.list,
+                    X.all,
+                    S,
+                    prior.user,
+                    full,
+                    fixed.xi,
+                    nonspatial,
+                    log.kappa,
+                    xi.constraint) 
     R <- gev.results.init(length(Y.list), dim(X.all)[2], n.reps)
     R$S <- S
     R$fixed.xi <- fixed.xi
