@@ -1,6 +1,3 @@
-
-
-
 SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariate files in netcdf-format (see above) 
                             station.annualMax.file, # File name of spreadsheet annualMax file (see above)
                             station.annualMax.sheet = 1, # The sheet name or index containing the station annualMax to be read (exactly 1 number)
@@ -715,7 +712,7 @@ get.sigma.22.inv.tau <- function(R, sigma.22.inv, burn=NULL, odens=1e3)
   return(sigma.22.inv.tau)
 }
 
-gev.impute.params <- function (R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau, burn = NULL, odens=1e3) 
+gev.impute.params <- function (R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau, burn = NULL, xi.constrain = c(-Inf,Inf), odens=1e3) 
 {
   reps <- dim(R$THETA)[1]
   if (is.null(burn)) burn <- round(reps/10)
@@ -760,7 +757,7 @@ gev.impute.params <- function (R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau
     tau.new <- rnorm(1, tau.hat, sd = sqrt(varsigma))
     
     xi.s <- XI[i] + tau.new
-    
+    xi.s = xi.s * (xi.s > xi.constrain[1] & xi.s < xi.constrain[2]) + xi.constrain[1] * (xi.s <= xi.constrain[1]) + xi.constrain[2] * (xi.s >= xi.constrain[2])
     P[i,] <- c(mu.s, kappa.s, xi.s)
   }
   return(P)
