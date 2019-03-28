@@ -643,10 +643,10 @@ gev.update.lambda <- function(tau, alpha, lambda, D, a, b, step = 1, lb = 1e-3)
     l.double.curr=l.curr.both[2]
     b.curr <- step * l.curr - l.double.curr * lambda
     d.curr <- -l.double.curr
-    if(d.curr > 0)
+    if(isTRUE(d.curr > 0))
       {
         lambda.new <- rtnorm(1, a = lb, b = Inf, mean = b.curr/d.curr, sd = sqrt(1/d.curr))
-        if(lambda.new > 0)
+        if(isTRUE(lambda.new > 0))
           {
             #l.new <- l.prime(tau, alpha, lambda.new, D, a, b)
             #l.double.new <- l.double.prime(tau, alpha, lambda.new, D, a, b)
@@ -674,7 +674,7 @@ gev.update.lambda <- function(tau, alpha, lambda, D, a, b, step = 1, lb = 1e-3)
 		    pnorm(q = lb, mean = b.new/d.new, sd = sqrt(1/d.new), lower.tail = FALSE, log.p = TRUE)
                 
                 mh <- L.new - L.curr + prior.new - prior.curr + prop.new - prop.curr
-                if(log(runif(1)) < mh)
+                if(isTRUE(log(runif(1)) < mh))
                   {
                     lambda <- lambda.new
                   }
