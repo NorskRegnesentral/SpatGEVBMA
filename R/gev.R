@@ -620,28 +620,40 @@ l.double.prime <- function(tau, alpha, lambda, D,a,b)	# Not in use
     res <- -0.5 * sum(diag(L.l)) - 0.5 * alpha * t(tau) %*% N.l %*% tau - (a - 1)*lambda^(-2)
     return(res[1])
   }
- 
-gev.update.lambda <- function(tau, alpha, lambda, D, a, b)
-  {
+# Truncated normal sampler - works for a < 37
+rtnorm <- function(n = 1, a = -Inf, b = Inf, mean = 0, sd = 1){
+  stopifnot(isTRUE(a < b), sd > 0)
+  if(a < 0){
+   Fa <- pnorm((a - mean) / sd)
+   Fb <- pnorm((b - mean) / sd)
+   mean + sd * qnorm(Fa + runif(n) * (Fb - Fa))
+  } else {
+    Fa <- pnorm((a - mean) / sd, lower.tail = FALSE)
+    Fb <- pnorm((b - mean) / sd, lower.tail = FALSE)
+    mean + sd * (-qnorm(Fa - (Fa - Fb) * runif(n)))
+  }
+}
 
+gev.update.lambda <- function(tau, alpha, lambda, D, a, b, step = 1, lb = 1e-3)
+  {
     #l.curr <- l.prime(tau, alpha, lambda, D, a, b)
     #l.double.curr <- l.double.prime(tau, alpha, lambda, D, a, b)
     l.curr.both=ldot(tau, alpha, lambda, D, a, b)
     l.curr=l.curr.both[1]
     l.double.curr=l.curr.both[2]
-    b.curr <- l.curr - l.double.curr * lambda
+    b.curr <- step * l.curr - l.double.curr * lambda
     d.curr <- -l.double.curr
-    if(d.curr > 0)
+    if(isTRUE(d.curr > 0))
       {
-        lambda.new <- rnorm(1, b.curr/d.curr, sd = sqrt(1/d.curr))
-        if(lambda.new > 0)
+        lambda.new <- rtnorm(1, a = lb, b = Inf, mean = b.curr/d.curr, sd = sqrt(1/d.curr))
+        if(isTRUE(lambda.new > 0))
           {
             #l.new <- l.prime(tau, alpha, lambda.new, D, a, b)
             #l.double.new <- l.double.prime(tau, alpha, lambda.new, D, a, b)
             l.both=ldot(tau, alpha, lambda.new, D, a, b)
             l.new=l.both[1]
             l.double.new=l.both[2]
-            b.new <- l.new - l.double.new * lambda.new
+            b.new <- step * l.new - l.double.new * lambda.new
             d.new <- -l.double.new
             if(d.new > 0)
               {
@@ -656,11 +668,13 @@ gev.update.lambda <- function(tau, alpha, lambda, D, a, b)
                 L.new <- -0.5 * alpha * t(tau) %*% E.l.new.inv %*% tau - 0.5 * logdet(E.l.new)
                 prior.curr <- dgamma(lambda, a,b, log=TRUE)
                 prior.new <- dgamma(lambda.new, a,b, log=TRUE)
-                prop.curr <- dnorm(lambda.new, b.curr/d.curr, sd = sqrt(1/d.curr), log=TRUE)
-                prop.new <- dnorm(lambda, b.new/d.new, sd = sqrt(1/d.new), log = TRUE)
+                prop.curr <- dnorm(lambda.new, b.curr/d.curr, sd = sqrt(1/d.curr), log=TRUE) -
+		    pnorm(q = lb, mean = b.curr/d.curr, sd = sqrt(1/d.curr), lower.tail = FALSE, log.p = TRUE)
+                prop.new <- dnorm(lambda, b.new/d.new, sd = sqrt(1/d.new), log = TRUE) - 
+		    pnorm(q = lb, mean = b.new/d.new, sd = sqrt(1/d.new), lower.tail = FALSE, log.p = TRUE)
                 
                 mh <- L.new - L.curr + prior.new - prior.curr + prop.new - prop.curr
-                if(log(runif(1)) < mh)
+                if(isTRUE(log(runif(1)) < mh))
                   {
                     lambda <- lambda.new
                   }
