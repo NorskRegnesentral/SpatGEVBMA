@@ -411,7 +411,7 @@ gev.update.tau.eta <- function(G)
         if(xi.s > G$xi.constrain[2]){
             xi.s = G$xi.constrain[2]
         }
-        if(xi.s < G$xi.contrain.xi[1]){
+        if(xi.s < G$xi.constrain.xi[1]){
             xi.s = G$xi.constrain[1]
         }
 
