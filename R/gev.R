@@ -170,6 +170,9 @@ f.double.prime <- function(tau, tau.hat, varsigma, xi, kappa, R) # Not in use
     return(res)
   }
 
+
+
+
 gev.update.tau.mu <- function(G)
   {
     n.s <- G$n.s
@@ -303,7 +306,7 @@ gev.update.tau.kappa <- function(G)
         if(xi.s > G$xi.constrain[2]){
             xi.s = G$xi.constrain[2]
         }
-        if(any(xi.s < G$xi.constrain[1])){
+        if(any(xi.s < G$xi.constrain.xi[1])){
             xi.s = G$xi.constrain[1]
         }
 
@@ -411,7 +414,7 @@ gev.update.tau.eta <- function(G)
         if(xi.s > G$xi.constrain[2]){
             xi.s = G$xi.constrain[2]
         }
-        if(xi.s < G$xi.constrain[1]){
+        if(xi.s < G$xi.constrain.xi[1]){
             xi.s = G$xi.constrain[1]
         }
 
@@ -763,8 +766,10 @@ gp.like.lambda <- function(lambda, alpha, tau, D)
     return(-l)
   }
 
-gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log.kappa, xi.constrain)
+gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log.kappa, xi.constrain,temporal=FALSE)
   {
+
+  
     ## I literally have no idea how this function got so long.
     G <- NULL
     n.s <- length(Y.list)
@@ -773,6 +778,8 @@ gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log
     p.max <- dim(X.all)[2]
     p <- p.max
     D <- make.D(S,S)
+    
+    
     G$p <- p
     G$Y.list <- Y.list
     G$X <- X.all
@@ -798,18 +805,48 @@ gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log
         Y.list2[[k]] <- Y.list[[i]]
         k <- k+1
         which.single.obs[i]=0
+      }else{
+        if(temporal==TRUE){
+        Y.list2[[k]] <- Y.list[[i]]
+        k=k+1
+        }
+        
       }
     }
     
     
-    ML0 <- matrix(unlist(lapply(Y.list2,"gevmle")),ncol=3, byrow=TRUE)
+    if(temporal==FALSE){
+      ML0 <- matrix(unlist(lapply(Y.list2,"gevmle")),ncol=3, byrow=TRUE) #dim location x loc,scale, shape. one "prior" calculated based on each location.
+      ML.single.obs <- colMeans(ML0)
+      
+      ML.t <- matrix(NA,ncol=length(Y.list),nrow=3)
+      ML.t[,as.logical(which.single.obs)] <- ML.single.obs #just take the colmean as init value.
+      ML.t[,!as.logical(which.single.obs)] <- t(ML0)
+      ML <- t(ML.t) 
+    }
+    
+    if(temporal==TRUE){ #all are single obs.
+      ML0 <- matrix(rep(gevmle(unlist(Y.list2)),length(Y.list2)),ncol=3, byrow=TRUE) #one "prior" calculated based on all data.
+      ML=ML0 #mu0 for all years.
+      
+      #To do: Should change here such that we can have one prior per location. Right now just one for all + some randomness.
 
-    ML.single.obs <- colMeans(ML0)
+      tmp=data.table(Y=unlist(Y.list2),order=order(unlist(Y.list2)),num=1:length(Y.list2))
 
-    ML.t <- matrix(NA,ncol=length(Y.list),nrow=3)
-    ML.t[,as.logical(which.single.obs)] <- ML.single.obs
-    ML.t[,!as.logical(which.single.obs)] <- t(ML0)
-    ML <- t(ML.t) 
+      tmp$mu=ML[,1]+rnorm(dim(ML)[1],mean=0,sd=sd(unlist(Y.list2)))
+      tmp[,munew:=(sort(mu))[rank(Y)]]
+
+      ML[,1]=tmp$munew
+      
+      #For initialization:
+      # Get one mu over all years.
+      # Sample z1 ,..., zT from a normal distribution.
+      # Order z1 ---> zT by size of Y_t.
+      # mu_t=mu+z_t
+      # Allows us to have mu=theta*X.
+    } 
+    
+
 
     G$prior <- NULL
 
@@ -821,13 +858,15 @@ gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log
     if(G$full){
       G$M.mu <- 1:p.max
     }else{
-      G$M.mu <- sort(unique(c(1,sort(sample(1:p.max,sum(rbinom(p.max,1,.5)), replace=FALSE)))))
+      G$M.mu <- sort(unique(c(1,sort(sample(1:p.max,sum(rbinom(p.max,1,.5)), replace=FALSE))))) # a random start model (BMA) is sampled.
     }
-    p.M <- length(G$M.mu)
-    X.M <- G$X[,G$M.mu,drop=FALSE]
+    p.M <- length(G$M.mu) #number of covariates. Depends on what happens above.
+    X.M <- G$X[,G$M.mu,drop=FALSE] #model matrix. Dimension equal to length of Y.list times p.M.
     Xi.mu <- t(X.M) %*% X.M + diag(p.M)
     Xi.mu.inv <- solve(Xi.mu)
-    theta.hat <- Xi.mu.inv %*% t(X.M) %*% mu.temp
+    theta.hat <- Xi.mu.inv %*% t(X.M) %*% mu.temp #start theta.hat.
+
+    
     G$theta.mu <- rep(0, p.max)
     G$theta.mu[G$M.mu] <- theta.hat
     tau <- mu.temp - X.M %*% theta.hat
@@ -838,6 +877,9 @@ gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log
       temp <- optimize(gp.like.lambda,interval=c(0,1e4),G$alpha.mu, tau, D) ## here
       G$lambda.mu <- temp[[1]]
     }
+    
+
+    
     G$prior$mu <- NULL
     if(is.null(prior.user$mu$beta.0))
       {
@@ -890,11 +932,18 @@ gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log
             p.M <- length(G$M.eta)
             X.M <- G$X[,G$M.eta,drop=FALSE]
             Xi.eta <- t(X.M) %*% X.M + diag(p.M)
+            
+
             Xi.eta.inv <- solve(Xi.eta)
             theta.hat <- Xi.eta.inv %*% t(X.M) %*% eta.temp
+            
+
+            
             G$theta.eta <- rep(0, p.max)
             G$theta.eta[G$M.eta] <- theta.hat
             tau <- eta.temp - X.M %*% theta.hat
+            
+
             G$tau.eta <- tau
             G$alpha.eta <- 1/var(tau)[1]
             G$lambda.eta <- 1    
@@ -1322,7 +1371,7 @@ spatial.gev.bma <- function(Y.list,
                             print.every=0,
                             nonspatial=FALSE,
                             log.kappa=FALSE,
-                            xi.constraint = c(-Inf,Inf))
+                            xi.constraint = c(-Inf,Inf),temporal=FALSE)
   {
     ##---- Oh R --
     S <- as.matrix(S)
@@ -1337,7 +1386,9 @@ spatial.gev.bma <- function(Y.list,
                     fixed.xi,
                     nonspatial,
                     log.kappa,
-                    xi.constraint) 
+                    xi.constraint,temporal=temporal) 
+      
+
     R <- gev.results.init(length(Y.list), dim(X.all)[2], n.reps)
     R$S <- S
     R$fixed.xi <- fixed.xi
@@ -1347,7 +1398,10 @@ spatial.gev.bma <- function(Y.list,
     for(i in 1:n.reps)
       {
         if( (print.every >0) && (i %% print.every == 0))print(paste("MCMC: On Iteration", i))
+
         G <- gev.update(G)
+
+        
         R$THETA[i,,1] <- G$theta.mu
         if(R$log.kappa)
             {
@@ -1394,7 +1448,11 @@ spatial.gev.bma <- function(Y.list,
             }else{
                 R$ACCEPT.TAU[i,,] <- cbind(G$accept.tau.mu,G$accept.tau.kappa,G$accept.tau.xi)
             }
-      }
+    }
+    
+    R$covariates=colnames(X)
+    
     return(R)
 
   }
+
