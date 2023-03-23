@@ -1,3 +1,4 @@
+library(akima);library(lubridate);library(ggplot2)
 findPCA=function(X,dt_coord,scale=FALSE){
   #--------------------------------------------------#
   if(0){#Example
@@ -63,25 +64,121 @@ pca_data=function (variable, pressure_level = NA, descriptive_string = NULL,
   }
 }
 
+
+#-----------------------------------------------#
+load("/nr/project/stat/Impetus4Change/Data/Embeddings/specific_humidity_850hPa_atlantic_pca_analysis.RData")
+coords=unique(dt_eigenvectors[,.(lon,lat)])
+dim(dt_eigenvectors)
+
+
+s1=interp(x=dt_eigenvectors$lon,y=dt_eigenvectors$lat,z=dt_eigenvectors$V1)
+s2=interp(x=dt_eigenvectors$lon,y=dt_eigenvectors$lat,z=dt_eigenvectors$V2)
+s3=interp(x=dt_eigenvectors$lon,y=dt_eigenvectors$lat,z=dt_eigenvectors$V3)
+s4=interp(x=dt_eigenvectors$lon,y=dt_eigenvectors$lat,z=dt_eigenvectors$V4)
+s5=interp(x=dt_eigenvectors$lon,y=dt_eigenvectors$lat,z=dt_eigenvectors$V5)
+s6=interp(x=dt_eigenvectors$lon,y=dt_eigenvectors$lat,z=dt_eigenvectors$V6)
+
+par(mfrow=c(2,3),mar=c(5,5,5,5))
+image.plot(s1);title("V1");image.plot(s2);title("V2");image.plot(s3);title("V3");
+image.plot(s4);title("V4");image.plot(s5);title("V5");image.plot(s6);title("V6");
+
+
+#------------------------------------------------------------------#
+load("/nr/project/stat/Impetus4Change/Data/Embeddings/specific_humidity_850hPa_atlantic_pca_analysis.RData")
+dt_factor_loadings=dt_factor_loadings[,.(V1,V2,V3,V4,V5,V6,date,hour)]
+dt_factor_loadings[,month:=month(date)]
+dt_factor_loadings[,year:=year(date)]
+
+dt_factor_loadings=dt_factor_loadings[,.(mean(V1),mean(V2),mean(V3),mean(V4),mean(V5),mean(V6)),.(month,year)]
+
+
+dt_factor_loadings
+
+ggplot(dt_factor_loadings[year %in% seq(1980,2020,by=4)],aes(x=month,y=V1,group=as.factor(year),color=as.factor(year)))+geom_line()
+ggplot(dt_factor_loadings[year %in% seq(1980,2020,by=4)],aes(x=month,y=V2,group=as.factor(year),color=as.factor(year)))+geom_line()
+ggplot(dt_factor_loadings[year %in% seq(1980,2020,by=4)],aes(x=month,y=V3,group=as.factor(year),color=as.factor(year)))+geom_line()
+ggplot(dt_factor_loadings[year %in% seq(1980,2020,by=4)],aes(x=month,y=V4,group=as.factor(year),color=as.factor(year)))+geom_line()
+ggplot(dt_factor_loadings[year %in% seq(1980,2020,by=4)],aes(x=month,y=V5,group=as.factor(year),color=as.factor(year)))+geom_line()
+ggplot(dt_factor_loadings[year %in% seq(1980,2020,by=4)],aes(x=month,y=V6,group=as.factor(year),color=as.factor(year)))+geom_line()
+
+
+#------------------------------------------------------------------#
+load("/nr/project/stat/Impetus4Change/Data/Embeddings/specific_humidity_850hPa_atlantic_pca_analysis.RData")
+dt_factor_loadings=dt_factor_loadings[,.(V1,V2,V3,V4,V5,V6,date,hour)]
+dt_factor_loadings[,month:=month(date)]
+dt_factor_loadings[,year:=year(date)]
+dt_factor_loadings=dt_factor_loadings[month %in% c(7,8,9),]
+
+dt_factor_loadings=dt_factor_loadings[,.(mean(V1),mean(V2),mean(V3),mean(V4),mean(V5),mean(V6)),.(year)]
+
+
+ggplot(dt_factor_loadings,aes(x=year,y=V1))+geom_line()+geom_point(pch=21,cex=3,bg="orange")
+ggplot(dt_factor_loadings,aes(x=year,y=V2))+geom_line()+geom_point(pch=21,cex=3,bg="orange")
+ggplot(dt_factor_loadings,aes(x=year,y=V3))+geom_line()+geom_point(pch=21,cex=3,bg="orange")
+ggplot(dt_factor_loadings,aes(x=year,y=V4))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
+ggplot(dt_factor_loadings,aes(x=year,y=V5))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
+ggplot(dt_factor_loadings,aes(x=year,y=V6))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
+
+
+
+
+
+#------------------------------------------------------------------#
 dat=pca_data("mean_sea_level_pressure_nao_standardized")
+dt_eigenvectors_nao=dat$dt_eigenvectors
 
-length(unique(dat$dt_zonal$lat))
-length(unique(dat$dt_zonal$date))
-
-#factor loadings kan brukes som kovariat:
-plot(dat$dt_zonal$zonal_mean[1:1000],type="l")
-plot(dat$dt_factor_loadings$V1[1:1000], type="l")
-lines(dat$dt_factor_loadings$V2[1:1000],col="red")
-lines(dat$dt_factor_loadings$V3[1:1000],col="blue")
-lines(dat$dt_factor_loadings$V4[1:1000],col="gray")
-lines(dat$dt_factor_loadings$V5[1:1000],col="gray")
+coords=unique(dt_eigenvectors_nao[,.(lon,lat)])
+dim(dt_eigenvectors_nao)
 
 
-dim(dat$dt_eigenvectors)
+s1=interp(x=dt_eigenvectors_nao$lon,y=dt_eigenvectors_nao$lat,z=dt_eigenvectors_nao$V1)
+s2=interp(x=dt_eigenvectors_nao$lon,y=dt_eigenvectors_nao$lat,z=dt_eigenvectors_nao$V2)
+s3=interp(x=dt_eigenvectors_nao$lon,y=dt_eigenvectors_nao$lat,z=dt_eigenvectors_nao$V3)
+s4=interp(x=dt_eigenvectors_nao$lon,y=dt_eigenvectors_nao$lat,z=dt_eigenvectors_nao$V4)
+s5=interp(x=dt_eigenvectors_nao$lon,y=dt_eigenvectors_nao$lat,z=dt_eigenvectors_nao$V5)
+s6=interp(x=dt_eigenvectors_nao$lon,y=dt_eigenvectors_nao$lat,z=dt_eigenvectors_nao$V6)
+
+par(mfrow=c(2,3),mar=c(5,5,5,5))
+image.plot(s1);title("V1");image.plot(s2);title("V2");image.plot(s3);title("V3");
+image.plot(s4);title("V4");image.plot(s5);title("V5");image.plot(s6);title("V6");
+
+dt_factor_loadings_nao=dat$dt_factor_loadings
+
+dt_factor_loadings_nao=dt_factor_loadings_nao[,.(V1,V2,V3,V4,V5,V6,date,hour)]
+dt_factor_loadings_nao=dt_factor_loadings_nao[,.(mean(V1),mean(V2),mean(V3),mean(V4),mean(V5),mean(V6)),.(date)]
+
+dt_factor_loadings_nao[,month:=month(date)]
+dt_factor_loadings_nao[,year:=year(date)]
+
+dt_factor_loadings_nao=dt_factor_loadings_nao[,.(mean(V1),mean(V2),mean(V3),mean(V4),mean(V5),mean(V6)),.(month,year)]
+
+dt_factor_loadings_nao
+
+ggplot(dt_factor_loadings_nao[year %in% seq(1980,2020,by=4)],aes(x=month,y=V1,group=as.factor(year),color=as.factor(year)))+geom_line()
+ggplot(dt_factor_loadings_nao[year %in% seq(1980,2020,by=4)],aes(x=month,y=V2,group=as.factor(year),color=as.factor(year)))+geom_line()
+ggplot(dt_factor_loadings_nao[year %in% seq(1980,2020,by=4)],aes(x=month,y=V3,group=as.factor(year),color=as.factor(year)))+geom_line()
+ggplot(dt_factor_loadings_nao[year %in% seq(1980,2020,by=4)],aes(x=month,y=V4,group=as.factor(year),color=as.factor(year)))+geom_line()
+ggplot(dt_factor_loadings_nao[year %in% seq(1980,2020,by=4)],aes(x=month,y=V5,group=as.factor(year),color=as.factor(year)))+geom_line()
+ggplot(dt_factor_loadings_nao[year %in% seq(1980,2020,by=4)],aes(x=month,y=V6,group=as.factor(year),color=as.factor(year)))+geom_line()
 
 
 
-plot(dat$dt_factor_loadings$V1[1:5000],type="l")
+#-------------------
+dat=pca_data("mean_sea_level_pressure_nao_standardized")
+dt_factor_loadings_nao=dat$dt_factor_loadings
 
-dat$dt_zonal
-dat$X_mean
+dt_factor_loadings_nao=dt_factor_loadings_nao[,.(V1,V2,V3,V4,V5,V6,date,hour)]
+dt_factor_loadings_nao[,month:=month(date)]
+dt_factor_loadings_nao[,year:=year(date)]
+dt_factor_loadings_nao=dt_factor_loadings_nao[month %in% c(9,10,11),]
+
+dt_factor_loadings_nao=dt_factor_loadings_nao[,.(mean(V1),mean(V2),mean(V3),mean(V4),mean(V5),mean(V6)),.(year)]
+
+
+ggplot(dt_factor_loadings_nao,aes(x=year,y=V1))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
+ggplot(dt_factor_loadings_nao,aes(x=year,y=V2))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
+ggplot(dt_factor_loadings_nao,aes(x=year,y=V3))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
+ggplot(dt_factor_loadings_nao,aes(x=year,y=V4))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
+ggplot(dt_factor_loadings_nao,aes(x=year,y=V5))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
+ggplot(dt_factor_loadings_nao,aes(x=year,y=V6))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
+
