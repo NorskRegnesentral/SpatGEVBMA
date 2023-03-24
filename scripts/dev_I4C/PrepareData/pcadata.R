@@ -1,4 +1,6 @@
 library(akima);library(lubridate);library(ggplot2)
+themeinfo=theme(axis.text = element_text(size = 20),axis.title = element_text(size = 20),legend.title = element_text(size=20),legend.text = element_text(size=20),plot.title = element_text(size = 20))
+
 findPCA=function(X,dt_coord,scale=FALSE){
   #--------------------------------------------------#
   if(0){#Example
@@ -107,17 +109,17 @@ load("/nr/project/stat/Impetus4Change/Data/Embeddings/specific_humidity_850hPa_a
 dt_factor_loadings=dt_factor_loadings[,.(V1,V2,V3,V4,V5,V6,date,hour)]
 dt_factor_loadings[,month:=month(date)]
 dt_factor_loadings[,year:=year(date)]
-dt_factor_loadings=dt_factor_loadings[month %in% c(7,8,9),]
+dt_factor_loadings=dt_factor_loadings[month %in% c(1:12),]
 
 dt_factor_loadings=dt_factor_loadings[,.(mean(V1),mean(V2),mean(V3),mean(V4),mean(V5),mean(V6)),.(year)]
 
 
-ggplot(dt_factor_loadings,aes(x=year,y=V1))+geom_line()+geom_point(pch=21,cex=3,bg="orange")
-ggplot(dt_factor_loadings,aes(x=year,y=V2))+geom_line()+geom_point(pch=21,cex=3,bg="orange")
-ggplot(dt_factor_loadings,aes(x=year,y=V3))+geom_line()+geom_point(pch=21,cex=3,bg="orange")
-ggplot(dt_factor_loadings,aes(x=year,y=V4))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
-ggplot(dt_factor_loadings,aes(x=year,y=V5))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
-ggplot(dt_factor_loadings,aes(x=year,y=V6))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
+ggplot(dt_factor_loadings,aes(x=year,y=V1))+geom_line()+geom_point(pch=21,cex=3,bg="gray")+themeinfo
+ggplot(dt_factor_loadings,aes(x=year,y=V2))+geom_line()+geom_point(pch=21,cex=3,bg="gray")+themeinfo
+ggplot(dt_factor_loadings,aes(x=year,y=V3))+geom_line()+geom_point(pch=21,cex=3,bg="gray")+themeinfo
+ggplot(dt_factor_loadings,aes(x=year,y=V4))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")+themeinfo
+ggplot(dt_factor_loadings,aes(x=year,y=V5))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")+themeinfo
+ggplot(dt_factor_loadings,aes(x=year,y=V6))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")+themeinfo
 
 
 
@@ -164,21 +166,22 @@ ggplot(dt_factor_loadings_nao[year %in% seq(1980,2020,by=4)],aes(x=month,y=V6,gr
 
 
 #-------------------
+
 dat=pca_data("mean_sea_level_pressure_nao_standardized")
 dt_factor_loadings_nao=dat$dt_factor_loadings
 
 dt_factor_loadings_nao=dt_factor_loadings_nao[,.(V1,V2,V3,V4,V5,V6,date,hour)]
 dt_factor_loadings_nao[,month:=month(date)]
 dt_factor_loadings_nao[,year:=year(date)]
-dt_factor_loadings_nao=dt_factor_loadings_nao[month %in% c(9,10,11),]
+dt_factor_loadings_nao=dt_factor_loadings_nao[month %in% c(1:12),]
 
 dt_factor_loadings_nao=dt_factor_loadings_nao[,.(mean(V1),mean(V2),mean(V3),mean(V4),mean(V5),mean(V6)),.(year)]
 
 
-ggplot(dt_factor_loadings_nao,aes(x=year,y=V1))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
-ggplot(dt_factor_loadings_nao,aes(x=year,y=V2))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
-ggplot(dt_factor_loadings_nao,aes(x=year,y=V3))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
-ggplot(dt_factor_loadings_nao,aes(x=year,y=V4))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
-ggplot(dt_factor_loadings_nao,aes(x=year,y=V5))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
-ggplot(dt_factor_loadings_nao,aes(x=year,y=V6))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")
+ggplot(dt_factor_loadings_nao,aes(x=year,y=V1))+geom_line()+geom_point(pch=21,cex=3,bg="gray")+themeinfo
+ggplot(dt_factor_loadings_nao,aes(x=year,y=V2))+geom_line()+geom_point(pch=21,cex=3,bg="gray")+themeinfo
+ggplot(dt_factor_loadings_nao,aes(x=year,y=V3))+geom_line()+geom_point(pch=21,cex=3,bg="gray")+themeinfo
+ggplot(dt_factor_loadings_nao,aes(x=year,y=V4))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")+themeinfo
+ggplot(dt_factor_loadings_nao,aes(x=year,y=V5))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")+themeinfo
+ggplot(dt_factor_loadings_nao,aes(x=year,y=V6))+geom_line()+geom_point(pch=21,cex=3,bg="skyblue")+themeinfo
 

@@ -40,10 +40,10 @@ makeLinPred=function(R,burnin=1e2,X,nonspatial=FALSE){
 
 #--------------------------------------------------------------------------------------------------------------------------------#
 amax_data=fread(file="/nr/samba/user/roksvag/GitRepo/SpatGEVBMA/scripts/dev_I4C/Data/AM60_cov.csv")[,.(lon,lat,year,masl,stid,
-                                                                                                   wetterdays_MAM,wetterdays_JJA,wetterdays_SON,
-                                                                                                   precip_MAM,precip_JJA,precip_SON,
-                                                                                                   temp_MAM,temp_JJA,temp_SON,
-                                                                                                   y)]
+                                                                                                       wetterdays_MAM,wetterdays_JJA,wetterdays_SON,wetterdays_annual,
+                                                                                                       precip_MAM,precip_JJA,precip_SON,precip_annual,
+                                                                                                       temp_MAM,temp_JJA,temp_SON,temp_annual,y)]
+
 amax_data=amax_data[lon<7&lat<62 & lat>58]
 
 spatgev_data=make_temporal_spatgev_data(amax_data,TRUE)
