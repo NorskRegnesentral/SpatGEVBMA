@@ -50,7 +50,7 @@ load("/nr/project/stat/Impetus4Change/Data/Embeddings/specific_humidity_850hPa_a
 dt_factor_loadings=dt_factor_loadings[,.(V1,V2,V3,V4,V5,V6,date,hour)]
 dt_factor_loadings[,month:=month(date)]
 dt_factor_loadings[,year:=year(date)]
-dt_factor_loadings=dt_factor_loadings[month %in% c(1:12),]
+dt_factor_loadings=dt_factor_loadings[month %in% c(6:8),]
 
 dt_factor_loadings=dt_factor_loadings[,.("hum1"=mean(V1),"hum2"=mean(V2),"hum3"=mean(V3),"hum4"=mean(V4),"hum5"=mean(V5),"hum6"=mean(V6)),.(year)]
 
@@ -65,7 +65,7 @@ dt_factor_loadings_nao=dat$dt_factor_loadings
 dt_factor_loadings_nao=dt_factor_loadings_nao[,.(V1,V2,V3,V4,V5,V6,date,hour)]
 dt_factor_loadings_nao[,month:=month(date)]
 dt_factor_loadings_nao[,year:=year(date)]
-dt_factor_loadings_nao=dt_factor_loadings_nao[month %in% c(1:12),]
+dt_factor_loadings_nao=dt_factor_loadings_nao[month %in% c(6:8),]
 
 dt_factor_loadings_nao=dt_factor_loadings_nao[,.("nao1"=mean(V1),"nao2"=mean(V2),"nao3"=mean(V3),"nao4"=mean(V4),"nao5"=mean(V5),"nao6"=mean(V6)),.(year)]
 
@@ -99,42 +99,42 @@ if(0){
 }
 
 ggplot(amax_data1440,aes(x=hum1,y=y))+geom_point()+ 
-  geom_smooth(method='lm', formula= y~x)
+  geom_smooth(method='lm', formula= y~x)+themeinfo
 
 ggplot(amax_data1440,aes(x=hum2,y=y))+geom_point()+ 
-  geom_smooth(method='lm', formula= y~x)
+  geom_smooth(method='lm', formula= y~x)+themeinfo
 
 ggplot(amax_data1440,aes(x=hum3,y=y))+geom_point()+ 
-  geom_smooth(method='lm', formula= y~x)
+  geom_smooth(method='lm', formula= y~x)+themeinfo
 
 ggplot(amax_data1440,aes(x=nao1,y=y))+geom_point()+ 
-  geom_smooth(method='lm', formula= y~x)
+  geom_smooth(method='lm', formula= y~x)+themeinfo
 
 ggplot(amax_data1440,aes(x=nao2,y=y))+geom_point()+ 
-  geom_smooth(method='lm', formula= y~x)
+  geom_smooth(method='lm', formula= y~x)+themeinfo
 
 ggplot(amax_data1440,aes(x=nao3,y=y))+geom_point()+ 
-  geom_smooth(method='lm', formula= y~x)
+  geom_smooth(method='lm', formula= y~x)+themeinfo
 
 
 
 ggplot(amax_data60,aes(x=hum1,y=y))+geom_point()+ 
-  geom_smooth(method='lm', formula= y~x)
+  geom_smooth(method='lm', formula= y~x)+themeinfo
 
 ggplot(amax_data60,aes(x=hum2,y=y))+geom_point()+ 
-  geom_smooth(method='lm', formula= y~x)
+  geom_smooth(method='lm', formula= y~x)+themeinfo
 
 ggplot(amax_data60,aes(x=hum3,y=y))+geom_point()+ 
-  geom_smooth(method='lm', formula= y~x)
+  geom_smooth(method='lm', formula= y~x)+themeinfo
 
 ggplot(amax_data60,aes(x=nao1,y=y))+geom_point()+ 
-  geom_smooth(method='lm', formula= y~x)
+  geom_smooth(method='lm', formula= y~x)+themeinfo
 
 ggplot(amax_data60,aes(x=nao2,y=y))+geom_point()+ 
-  geom_smooth(method='lm', formula= y~x)
+  geom_smooth(method='lm', formula= y~x)+themeinfo
 
 ggplot(amax_data60,aes(x=nao3,y=y))+geom_point()+ 
-  geom_smooth(method='lm', formula= y~x)
+  geom_smooth(method='lm', formula= y~x)+themeinfo
 
 
 

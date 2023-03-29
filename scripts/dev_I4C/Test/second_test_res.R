@@ -48,7 +48,7 @@ amax_data=amax_data[lon<7&lat<62 & lat>58]
 
 spatgev_data=make_temporal_spatgev_data(amax_data,TRUE)
 
-load("/nr/project/stat/Impetus4Change/Res/mcmc_temporal_spatial20000.Rdata")
+load("/nr/project/stat/Impetus4Change/Res/mcmc_temporal_spatial50000_hourly.Rdata")
 
 burnin=5000
 n=dim(mcmc_res$THETA)[1]
@@ -75,7 +75,7 @@ yrloc[,num:=1:(dim(amax_data)[1])]
 uniquelocs=unique(yrloc$stid)
 
 #if non-spatial=TRUE:
-plot(NA,ylim=c(-30,30),xlim=c(1960,2022))
+plot(NA,ylim=c(-100,100),xlim=c(1960,2022))
 for(j in 1:length(uniquelocs)){
   currloc=yrloc[stid==uniquelocs[j]]
   curr_postmedian=apply(mcmc_res$TAU[,currloc$num,1],2,mean)

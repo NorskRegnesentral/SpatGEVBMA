@@ -3,9 +3,9 @@ library(data.table)
 library(devtools)
 
 setwd("/nr/samba/user/roksvag/GitRepo/SpatGEVBMA/")
-source("R/gev.R")
-source("R/temporal_spatgev.R")
-source("R/RcppExports.R")
+#source("R/gev.R")
+#source("R/temporal_spatgev.R")
+#source("R/RcppExports.R")
 
 
 amax_data=fread(file="scripts/dev_I4C/Data/AM60_cov.csv")[,.(lon,lat,year,masl,stid,
@@ -21,7 +21,7 @@ mcmc_res=spatial.gev.bma(Y.list=spatgev_data$Y,X.all=spatgev_data$X,S=spatgev_da
                          temporal=TRUE,print.every=100,nonspatial = FALSE)
 
 
-save(mcmc_res,file="/nr/project/stat/Impetus4Change/Res/mcmc_temporal_spatial50000_1440.Rdata")
+save(mcmc_res,file="/nr/project/stat/Impetus4Change/Res/mcmc_temporal_spatial50000_hourly.Rdata")
 
 #Go to folder where the script is.
 #export OPENBLAS_NUM_THREADS=1
