@@ -1,3 +1,4 @@
+#' @export
 logdet <- function(A)
   {
     return(2 * sum(log(diag(chol(A)))))
@@ -1361,6 +1362,7 @@ gev.impute <- function(R,X.drop, S.drop, burn = NULL, n.each = NULL,return.param
       return(as.vector(Y))
   }
 
+#' @export
 spatial.gev.bma <- function(Y.list,
                             X.all,
                             S,
