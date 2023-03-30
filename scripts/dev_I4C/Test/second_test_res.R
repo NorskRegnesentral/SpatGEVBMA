@@ -78,11 +78,12 @@ uniquelocs=unique(yrloc$stid)
 plot(NA,ylim=c(-100,100),xlim=c(1960,2022))
 for(j in 1:length(uniquelocs)){
   currloc=yrloc[stid==uniquelocs[j]]
-  curr_postmedian=apply(mcmc_res$TAU[,currloc$num,1],2,mean)
+  curr_postmedian=apply(mcmc_res$TAU[,currloc$num,3],2,mean)
   
   lines(currloc$year,curr_postmedian,type="o",col=j,lty=j);grid()
 
 }
+
 
 #if non-spatial = FALSE:
 for(j in 1:length(uniquelocs)){
@@ -95,3 +96,5 @@ for(j in 1:length(uniquelocs)){
 
 
 #Alle får samme tidseffekt --> Bra.
+
+colMeans(mcmc_res$ACCEPT.TAU[,,1])

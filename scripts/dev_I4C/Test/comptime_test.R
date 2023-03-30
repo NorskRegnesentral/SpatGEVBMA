@@ -4,12 +4,13 @@ library(devtools)
 
 #-----------------------------------------------------#
 setwd("/nr/samba/user/roksvag/GitRepo/SpatGEVBMA/")
-source("R/gev.R")
-source("R/temporal_spatgev.R")
+#source("R/gev.R")
+#source("R/temporal_spatgev.R")
 #-----------------------------------------------------#
 
 #Upload hourly data (change 60 to 1440 to get daily data):
 amax_data=fread(file="scripts/dev_I4C/Data/AM60_cov.csv")
+
 
 #Select some covariates:
 amax_data=amax_data[,.(lon,lat,year,masl,stid,
