@@ -4,6 +4,16 @@ logdet <- function(A)
     return(2 * sum(log(diag(chol(A)))))
   }
 
+
+#' Title
+#'
+#' @param x.1 
+#' @param x.2 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 make.D <- function(x.1, x.2)
   {
     ##AFL, 31.07.13
@@ -19,6 +29,17 @@ make.D <- function(x.1, x.2)
     return(D)
   }
 
+#' Title
+#'
+#' @param p 
+#' @param mu 
+#' @param sigma 
+#' @param xi 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.z.p <- function(p,mu, sigma, xi)
   {
     if(abs(xi[1]) < 1e-8)
@@ -33,6 +54,17 @@ gev.z.p <- function(p,mu, sigma, xi)
   }
 
 
+#' Title
+#'
+#' @param Y 
+#' @param mu 
+#' @param kappa 
+#' @param xi 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.like <- function(Y,mu,kappa,xi)
   {
       if(abs(xi) < 1e-8)
@@ -46,6 +78,16 @@ gev.like <- function(Y,mu,kappa,xi)
     return(l)
   }
 
+#' Title
+#'
+#' @param x 
+#' @param mu 
+#' @param Sigma 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 dmvnorm <- function(x, mu, Sigma)
   {
     p <- length(x)
@@ -55,6 +97,22 @@ dmvnorm <- function(x, mu, Sigma)
   }
 
 ##----------------- Generic Functions for the linear model parts ----------------
+#' Title
+#'
+#' @param Y 
+#' @param X 
+#' @param M 
+#' @param alpha 
+#' @param lambda 
+#' @param D 
+#' @param beta.0 
+#' @param Omega.0 
+#' @param nonspatial 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.update.M <- function(Y,X,M,alpha,lambda,D, beta.0, Omega.0,nonspatial=FALSE)
   {
     p <- dim(X)[2]
@@ -113,6 +171,22 @@ gev.update.M <- function(Y,X,M,alpha,lambda,D, beta.0, Omega.0,nonspatial=FALSE)
     return(M.curr)
   }
 
+#' Title
+#'
+#' @param Y 
+#' @param X 
+#' @param M 
+#' @param alpha 
+#' @param lambda 
+#' @param D 
+#' @param beta.0 
+#' @param Omega.0 
+#' @param nonspatial 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.update.theta <- function(Y,X,M,alpha,lambda,D, beta.0, Omega.0,nonspatial=FALSE)
   {
     p <- dim(X)[2]
@@ -140,6 +214,19 @@ gev.update.theta <- function(Y,X,M,alpha,lambda,D, beta.0, Omega.0,nonspatial=FA
 ##----------- End generic linear model functions -------------------------
 
 ##---------- Updating Mu random effects ----------------------------------
+#' Title
+#'
+#' @param tau 
+#' @param tau.hat 
+#' @param varsigma 
+#' @param xi 
+#' @param kappa 
+#' @param R 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 f.prime <- function(tau,tau.hat,varsigma,xi,kappa,R)	# Not in use
   {
       if(abs(xi) < 1e-8)
@@ -156,6 +243,19 @@ f.prime <- function(tau,tau.hat,varsigma,xi,kappa,R)	# Not in use
     return(res)
   }
 
+#' Title
+#'
+#' @param tau 
+#' @param tau.hat 
+#' @param varsigma 
+#' @param xi 
+#' @param kappa 
+#' @param R 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 f.double.prime <- function(tau, tau.hat, varsigma, xi, kappa, R) # Not in use
   {
       if(abs(xi) < 1e-8)
@@ -174,6 +274,14 @@ f.double.prime <- function(tau, tau.hat, varsigma, xi, kappa, R) # Not in use
 
 
 
+#' Title
+#'
+#' @param G 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.update.tau.mu <- function(G)
   {
     n.s <- G$n.s
@@ -252,6 +360,19 @@ gev.update.tau.mu <- function(G)
 ##------------------ End Updating Mu Random Effects ----------------------------
 
 ##---------  Updating Kappa Random Effects -------------------------------------
+#' Title
+#'
+#' @param tau 
+#' @param tau.hat 
+#' @param varsigma 
+#' @param xi 
+#' @param kappa.hat 
+#' @param eps 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 g.prime <- function(tau,tau.hat,varsigma,xi,kappa.hat,eps)	# Not in use
   {
    if(abs(xi) < 1e-8)
@@ -267,6 +388,19 @@ g.prime <- function(tau,tau.hat,varsigma,xi,kappa.hat,eps)	# Not in use
    return(res)
   }
 
+#' Title
+#'
+#' @param tau 
+#' @param tau.hat 
+#' @param varsigma 
+#' @param xi 
+#' @param kappa.hat 
+#' @param eps 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 g.double.prime <- function(tau, tau.hat, varsigma, xi, kappa.hat, eps)	# Not in use
   {
    if(abs(xi) < 1e-8)
@@ -282,6 +416,14 @@ g.double.prime <- function(tau, tau.hat, varsigma, xi, kappa.hat, eps)	# Not in 
       return(res)
   }
 
+#' Title
+#'
+#' @param G 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.update.tau.kappa <- function(G)
   {
 
@@ -358,6 +500,19 @@ gev.update.tau.kappa <- function(G)
 ##----------------- End Updating Kappa Random Effects -------------------------------------
 
 ##---------  Updating Eta (log Kappa) Random Effects -------------------------------------
+#' Title
+#'
+#' @param tau 
+#' @param tau.hat 
+#' @param varsigma 
+#' @param xi 
+#' @param eta.hat 
+#' @param eps 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 g.eta.prime <- function(tau,tau.hat,varsigma,xi,eta.hat,eps)	# Not in use
   {
       if(abs(xi) < 1e-8)
@@ -374,6 +529,19 @@ g.eta.prime <- function(tau,tau.hat,varsigma,xi,eta.hat,eps)	# Not in use
     return(res)
   }
 
+#' Title
+#'
+#' @param tau 
+#' @param tau.hat 
+#' @param varsigma 
+#' @param xi 
+#' @param eta.hat 
+#' @param eps 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 g.eta.double.prime <- function(tau, tau.hat, varsigma, xi, eta.hat, eps)	# Not in use
   {
       if(abs(xi) < 1e-8)
@@ -390,6 +558,14 @@ g.eta.double.prime <- function(tau, tau.hat, varsigma, xi, eta.hat, eps)	# Not i
     return(res)
   }
 
+#' Title
+#'
+#' @param G 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.update.tau.eta <- function(G)
   {
 
@@ -465,6 +641,20 @@ gev.update.tau.eta <- function(G)
 ##----------------- End Updating Eta (log kappa) Random Effects -------------------------------------
 
 ##-------------- Updating Xi Random Effects -----------------------------------------------
+#' Title
+#'
+#' @param tau 
+#' @param tau.hat 
+#' @param varsigma 
+#' @param kappa 
+#' @param xi.hat 
+#' @param eps 
+#' @param censored 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 j.prime <- function(tau, tau.hat, varsigma, kappa, xi.hat, eps,
                     censored = FALSE)	
   {
@@ -482,6 +672,20 @@ j.prime <- function(tau, tau.hat, varsigma, kappa, xi.hat, eps,
     return(res)
   }
 
+#' Title
+#'
+#' @param tau 
+#' @param tau.hat 
+#' @param varsigma 
+#' @param kappa 
+#' @param xi.hat 
+#' @param eps 
+#' @param censored 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 j.double.prime <- function(tau, tau.hat, varsigma, kappa, xi.hat, eps, censored = FALSE)
   {
       h <- 1 + kappa * eps * (xi.hat + tau)
@@ -507,6 +711,14 @@ j.double.prime <- function(tau, tau.hat, varsigma, kappa, xi.hat, eps, censored 
       return(res)
   }
 
+#' Title
+#'
+#' @param G 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.update.tau.xi <- function(G)
   {
 
@@ -599,6 +811,19 @@ gev.update.tau.xi <- function(G)
 ##--------------- End Updating Xi Random Effects -----------------------------------------
 
 ##--------------  Updating Gaussian Process Hyper Parameters -----------------------------
+#' Title
+#'
+#' @param tau 
+#' @param alpha 
+#' @param lambda 
+#' @param D 
+#' @param a 
+#' @param b 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 l.prime <- function(tau, alpha, lambda,D,a,b)	# Not in use
   {
     E.l <- exp(-1/lambda * D)
@@ -611,6 +836,19 @@ l.prime <- function(tau, alpha, lambda,D,a,b)	# Not in use
     return(res[1])
   }
 
+#' Title
+#'
+#' @param tau 
+#' @param alpha 
+#' @param lambda 
+#' @param D 
+#' @param a 
+#' @param b 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 l.double.prime <- function(tau, alpha, lambda, D,a,b)	# Not in use
   {
     E.l <- exp(-1/lambda * D)
@@ -623,8 +861,22 @@ l.double.prime <- function(tau, alpha, lambda, D,a,b)	# Not in use
     N.l <- M.l %*% (-F.l) %*% E.inv + E.inv %*% (-G.l) %*% E.inv + E.inv %*% (-F.l) %*% M.l
     res <- -0.5 * sum(diag(L.l)) - 0.5 * alpha * t(tau) %*% N.l %*% tau - (a - 1)*lambda^(-2)
     return(res[1])
-  }
+}
+
+
 # Truncated normal sampler - works for a < 37
+#' Title
+#'
+#' @param n 
+#' @param a 
+#' @param b 
+#' @param mean 
+#' @param sd 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 rtnorm <- function(n = 1, a = -Inf, b = Inf, mean = 0, sd = 1){
   stopifnot(isTRUE(a < b), sd > 0)
   if(a < 0){
@@ -638,6 +890,24 @@ rtnorm <- function(n = 1, a = -Inf, b = Inf, mean = 0, sd = 1){
   }
 }
 
+
+
+
+#' Title
+#'
+#' @param tau 
+#' @param alpha 
+#' @param lambda 
+#' @param D 
+#' @param a 
+#' @param b 
+#' @param step 
+#' @param lb 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.update.lambda <- function(tau, alpha, lambda, D, a, b, step = 1, lb = 1e-3)
   {
     #l.curr <- l.prime(tau, alpha, lambda, D, a, b)
@@ -688,6 +958,14 @@ gev.update.lambda <- function(tau, alpha, lambda, D, a, b, step = 1, lb = 1e-3)
     return(lambda)
   }
 
+#' Title
+#'
+#' @param G 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.update.hyper <- function(G)
   {
     ##--------- Update Mu -------------
@@ -756,6 +1034,17 @@ gev.update.hyper <- function(G)
 ##----------------- End Update Hyper parameters ----------------------------------------
 
 ##----------------- Initialize Object and helper functions -----------------------------
+#' Title
+#'
+#' @param lambda 
+#' @param alpha 
+#' @param tau 
+#' @param D 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gp.like.lambda <- function(lambda, alpha, tau, D)
   {
     if(alpha < 0) return(-Inf)
@@ -767,6 +1056,23 @@ gp.like.lambda <- function(lambda, alpha, tau, D)
     return(-l)
   }
 
+#' Title
+#'
+#' @param Y.list 
+#' @param X.all 
+#' @param S 
+#' @param prior.user 
+#' @param full 
+#' @param fixed.xi 
+#' @param nonspatial 
+#' @param log.kappa 
+#' @param xi.constrain 
+#' @param temporal 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log.kappa, xi.constrain,temporal=FALSE)
   {
 
@@ -1128,6 +1434,14 @@ gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log
 ##--------------------------------------------------------------
 
 ##--------------- Routines -------------------------------------
+#' Title
+#'
+#' @param G 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.update <- function(G)
   {
 
@@ -1178,8 +1492,19 @@ gev.update <- function(G)
 
     return(G)
 
-  }
+}
 
+
+#' Title
+#'
+#' @param n.s 
+#' @param p 
+#' @param n.reps 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.results.init <- function(n.s, p, n.reps)
   {
     R <- NULL
@@ -1192,6 +1517,17 @@ gev.results.init <- function(n.s, p, n.reps)
     return(R)
   }
 
+
+
+#' Title
+#'
+#' @param R 
+#' @param burn 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.process.results <- function(R, burn=1e2)
   {
     output <- NULL
@@ -1240,6 +1576,17 @@ gev.process.results <- function(R, burn=1e2)
 
   }
 
+
+
+#' Title
+#'
+#' @param Y.obs 
+#' @param Y.samp 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.crps <- function(Y.obs, Y.samp)
   {
     n <- length(Y.obs)
@@ -1255,6 +1602,17 @@ gev.crps <- function(Y.obs, Y.samp)
   }
 
 
+
+
+#' Title
+#'
+#' @param Y.obs 
+#' @param Y.samp 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.logscore <- function(Y.obs, Y.samp)
   {
     den <- density(Y.samp)
@@ -1263,6 +1621,22 @@ gev.logscore <- function(Y.obs, Y.samp)
     return(ls)
   }
 
+
+
+#' Title
+#'
+#' @param R 
+#' @param X.drop 
+#' @param S.drop 
+#' @param burn 
+#' @param n.each 
+#' @param return.param 
+#' @param xi.constrain 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.impute <- function(R,X.drop, S.drop, burn = NULL, n.each = NULL,return.param=FALSE, xi.constrain = c(-Inf,Inf))
   {
     reps <- dim(R$THETA)[1]
@@ -1362,6 +1736,22 @@ gev.impute <- function(R,X.drop, S.drop, burn = NULL, n.each = NULL,return.param
       return(as.vector(Y))
   }
 
+
+
+#' @param Y.list 
+#'
+#' @param X.all 
+#' @param S 
+#' @param n.reps 
+#' @param prior.user 
+#' @param full 
+#' @param fixed.xi 
+#' @param print.every 
+#' @param nonspatial 
+#' @param log.kappa 
+#' @param xi.constraint 
+#' @param temporal 
+#'
 #' @export
 spatial.gev.bma <- function(Y.list,
                             X.all,

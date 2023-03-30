@@ -1,3 +1,34 @@
+#' Title
+#'
+#' @param Q 
+#' @param shortName 
+#' @param longName 
+#' @param post.quantiles 
+#' @param IQRLongName 
+#' @param show.uncertainty 
+#' @param ww.na 
+#' @param n 
+#' @param output.x 
+#' @param output.y 
+#' @param output.name 
+#' @param filename.nc 
+#' @param filename.pdf 
+#' @param main.quantile 
+#' @param main.iqr 
+#' @param nx 
+#' @param ny 
+#' @param dim.list 
+#' @param all.post.quantiles 
+#' @param transform.output 
+#' @param original.image 
+#' @param XYGrid 
+#' @param coordinate.type 
+#' @param S 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 print_map = function(Q,
                      shortName,
                      longName,

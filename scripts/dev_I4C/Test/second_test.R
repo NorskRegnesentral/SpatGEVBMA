@@ -3,9 +3,6 @@ library(data.table)
 library(devtools)
 
 setwd("/nr/samba/user/roksvag/GitRepo/SpatGEVBMA/")
-#source("R/gev.R")
-#source("R/temporal_spatgev.R")
-#source("R/RcppExports.R")
 
 
 amax_data=fread(file="scripts/dev_I4C/Data/AM60_cov.csv")[,.(lon,lat,year,masl,stid,

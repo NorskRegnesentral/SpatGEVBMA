@@ -1,3 +1,33 @@
+#' Title
+#'
+#' @param covariates.folder 
+#' @param station.annualMax.file 
+#' @param station.annualMax.sheet 
+#' @param station.locations.file 
+#' @param output.path 
+#' @param output.folder.name 
+#' @param return.period 
+#' @param post.quantiles 
+#' @param show.uncertainty 
+#' @param coordinate.type 
+#' @param transform.output 
+#' @param table.format 
+#' @param mcmc.reps 
+#' @param burn.in 
+#' @param cores 
+#' @param annualMax.name 
+#' @param create.tempfiles 
+#' @param keep.temp.files 
+#' @param save.all.output 
+#' @param testing 
+#' @param seed 
+#' @param fixed.xi 
+#' @param xi.constrain 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariate files in netcdf-format (see above) 
                             station.annualMax.file, # File name of spreadsheet annualMax file (see above)
                             station.annualMax.sheet = 1, # The sheet name or index containing the station annualMax to be read (exactly 1 number)
@@ -669,6 +699,16 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
 
 ### Additional help functions
 
+#' Title
+#'
+#' @param R 
+#' @param burn 
+#' @param odens 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 get.sigma.22.inv <- function(R, burn=NULL, odens=1e3)
 {
   n.s <- dim(R$S)[1]
@@ -693,6 +733,17 @@ get.sigma.22.inv <- function(R, burn=NULL, odens=1e3)
   return(sigma.22.inv)
 }
 
+#' Title
+#'
+#' @param R 
+#' @param sigma.22.inv 
+#' @param burn 
+#' @param odens 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 get.sigma.22.inv.tau <- function(R, sigma.22.inv, burn=NULL, odens=1e3)
 {
   n.s <- dim(R$S)[1]
@@ -712,6 +763,21 @@ get.sigma.22.inv.tau <- function(R, sigma.22.inv, burn=NULL, odens=1e3)
   return(sigma.22.inv.tau)
 }
 
+#' Title
+#'
+#' @param R 
+#' @param X.drop 
+#' @param S.drop 
+#' @param sigma.22.inv 
+#' @param sigma.22.inv.tau 
+#' @param burn 
+#' @param xi.constrain 
+#' @param odens 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 gev.impute.params <- function (R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau, burn = NULL, xi.constrain = c(-Inf,Inf), odens=1e3) 
 {
   reps <- dim(R$THETA)[1]
@@ -763,6 +829,23 @@ gev.impute.params <- function (R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau
   return(P)
 }
 
+#' Title
+#'
+#' @param i 
+#' @param cov.map 
+#' @param S.map 
+#' @param R 
+#' @param sigma.22.inv 
+#' @param sigma.22.inv.tau 
+#' @param return.period 
+#' @param all.post.quantiles 
+#' @param N 
+#' @param xi.constrain 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 imputation.func <- function(i,cov.map,S.map,R,sigma.22.inv,sigma.22.inv.tau,return.period,all.post.quantiles,N,xi.constrain=c(-Inf,Inf))
 {
 

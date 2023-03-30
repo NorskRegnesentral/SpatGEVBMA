@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // ldot
 arma::colvec ldot(arma::colvec tau, double alpha, double lambda, arma::mat D, double a, double b);
 RcppExport SEXP _SpatGEVBMA_ldot(SEXP tauSEXP, SEXP alphaSEXP, SEXP lambdaSEXP, SEXP DSEXP, SEXP aSEXP, SEXP bSEXP) {
