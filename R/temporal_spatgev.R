@@ -1,3 +1,4 @@
+#' @export
 make_temporal_spatgev_data=function(amax_data,to_standardize=TRUE,add_intercept=TRUE){
   Y=as.list(amax_data[,y])
   X=copy(amax_data)

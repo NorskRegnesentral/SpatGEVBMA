@@ -1,11 +1,16 @@
+rm(list = ls())
+
 library(SpatGEVBMA)
-library(data.table)
-library(devtools)
 
 #-----------------------------------------------------#
-setwd("/nr/samba/user/roksvag/GitRepo/SpatGEVBMA/")
-#source("R/gev.R")
-#source("R/temporal_spatgev.R")
+loc_thea = "/nr/samba/user/roksvag/GitRepo/SpatGEVBMA/"
+if(file.exists(loc_thea)){
+    setwd(loc_thea)
+}else{
+    setwd("~/pkg/SpatGEVBMA/")
+}
+source("R/gev.R")
+source("R/temporal_spatgev.R")
 #-----------------------------------------------------#
 
 #Upload hourly data (change 60 to 1440 to get daily data):
