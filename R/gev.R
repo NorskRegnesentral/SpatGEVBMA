@@ -1843,6 +1843,8 @@ spatial.gev.bma <- function(Y.list,
     }
     
     R$covariates=colnames(X.all)
+    R$X=X.all
+    R$Y=Y.list
     
     return(R)
 

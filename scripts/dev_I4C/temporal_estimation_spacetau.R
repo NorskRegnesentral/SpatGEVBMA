@@ -31,7 +31,7 @@ if(subset==TRUE){
 }
 
 #Data preparation:
-spatgev_data=make_temporal_spatgev_data(amax_data,TRUE)
+spatgev_data=make_temporal_spatgev_data(amax_data,tau_effect="spatial")
 
 n.reps=100000 #mcmc iterations.
 nonspatial=TRUE #Set nonspatial=TRUE to make the random effect iid.
@@ -44,7 +44,7 @@ mcmc_all=spatial.gev.bma(Y.list=spatgev_data$Y,X.all=spatgev_data$X,S=spatgev_da
 if(subset==FALSE){
   save(mcmc_all,file=paste0("/nr/project/stat/Impetus4Change/Res/cv_temporal/nonspat",as.numeric(nonspatial),"_allyears.Rdata"))
 }else{
-  save(mcmc_all,file=paste0("/nr/project/stat/Impetus4Change/Res/cv_temporal_subset/nonspat",as.numeric(nonspatial),"_allyears.Rdata"))
+  save(mcmc_all,file=paste0("/nr/project/stat/Impetus4Change/Res/cv_temporal_subset_spacetau/nonspat",as.numeric(nonspatial),"_allyears.Rdata"))
 }
 
 #Then CV where we leave out each of these combinations:
@@ -55,15 +55,15 @@ for(j in 1:length(cv_years)){
   
   curr_amax=curr_amax[!(year%in%to_remove),]
   
-  spatgev_data=make_temporal_spatgev_data(curr_amax,TRUE)
-  
-  mcmc_cv=spatial.gev.bma(Y.list=spatgev_data$Y,X.all=spatgev_data$X,S=spatgev_data$S,n.reps=n.reps,
-                           temporal=TRUE,print.every=1000,nonspatial = nonspatial)
+  spatgev_data=make_temporal_spatgev_data(curr_amax,tau_effect="spatial")
+
+    mcmc_cv=spatial.gev.bma(Y.list=spatgev_data$Y,X.all=spatgev_data$X,S=spatgev_data$S,n.reps=n.reps,
+                          temporal=TRUE,print.every=1000,nonspatial = nonspatial)
   
   if(subset==FALSE){
     save(mcmc_cv,file=paste0("/nr/project/stat/Impetus4Change/Res/cv_temporal/nonspat",as.numeric(nonspatial),"_cv_",to_remove[1],"_",tail(to_remove,1),".Rdata"))
   }else{
-    save(mcmc_cv,file=paste0("/nr/project/stat/Impetus4Change/Res/cv_temporal_subset/nonspat",as.numeric(nonspatial),"_cv_",to_remove[1],"_",tail(to_remove,1),".Rdata"))
+    save(mcmc_cv,file=paste0("/nr/project/stat/Impetus4Change/Res/cv_temporal_subset_spacetau/nonspat",as.numeric(nonspatial),"_cv_",to_remove[1],"_",tail(to_remove,1),".Rdata"))
     
   }
 }
