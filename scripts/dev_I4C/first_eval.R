@@ -46,6 +46,7 @@ optim_gev=function(paramvec,y){
 }
 
 #----------Frequentist simple GEV-fit---------------------#
+setwd("/nr/samba/user/roksvag/GitRepo/SpatGEVBMA/")
 amax_data=fread(file="scripts/dev_I4C/Data/AM60_cov.csv")[lon<7&lat<62 & lat>58 & year>=1972 & year<=2015] 
 uniquelocs2=unique(amax_data[,.(lon,lat)])
 
@@ -53,7 +54,7 @@ freqres=c()
 for(j in 1:dim(uniquelocs2)[1]){
   sub=amax_data[lon==uniquelocs2$lon[j] & lat==uniquelocs2$lat[j],.(stid,year,lon,lat,y)]
   
-  freqres=rbind(freqres,optim(par=c(1,1,1),optim_gev,y=sub$y,lower=c(5,0.0001,-2),upper=c(50,50,2),method="L-BFGS-B")$par)
+  freqres=rbind(freqres,optim(par=c(1,1,1),optim_gev,y=sub$y,lower=c(0.0001,0.0001,-5),upper=c(100,100,5),method="L-BFGS-B")$par)
   
 }
 freqres[,2]=1/freqres[,2]
@@ -161,8 +162,6 @@ summarize_results=function(mcmc_res,amax_data,fit_type="annual",include_tau=1,cl
   return(list(linpred=linpred,X=spatgev_data$X,X_unscaled=X_unscaled,X_clim=X_clim,X_clim_unscaled=X_clim_unscaled))
 }
 
-
-
 calculate_parameters_clim=function(linpred_res,targlon,targlat){
   X_clim=linpred_res$X_clim_unscaled
   uniquelocs=unique(data.table(X_clim)[,.(lon,lat)])
@@ -177,18 +176,32 @@ calculate_parameters_clim=function(linpred_res,targlon,targlat){
   return(list(mu=mu,kappa=kappa,xi=xi,lon=targlon,lat=targlat))
 }
 
+gringorten <- function(x) {
+  rank <- rank(x, na.last = "keep", ties.method = "first")
+  len <- sum(!is.na(x))
+  xx <- (rank - 0.44)/(len + 0.12)
+  return(xx)
+}
+
+
+
+
 #---------------------------------------------------------------------------------------------------#
 amax_data=fread(file="scripts/dev_I4C/Data/AM60_cov.csv")
 
-load("/nr/project/stat/Impetus4Change/Res/cv_temporal_subset_spacetau/nonspat1_allyears.Rdata")
+load("/nr/project/stat/Impetus4Change/Res/cv_temporal_subset_spacetau/nonspat0_allyears.Rdata")
 mcmc_temp=mcmc_all
 linpred_temp=summarize_results(mcmc_temp,amax_data,fit_type="annual",include_tau=1)
 linpred_temp0=summarize_results(mcmc_temp,amax_data,fit_type="annual",clim_res=TRUE,include_tau=1)
+linpred_temp0_notau=summarize_results(mcmc_temp,amax_data,fit_type="annual",clim_res=TRUE,include_tau=0)
+
 
 #---------------------------------------------------------------------------------------------------#
-load("/nr/project/stat/Impetus4Change/Res/cv_spatial/nonspat1_allyears.Rdata")
+load("/nr/project/stat/Impetus4Change/Res/cv_spatial/nonspat0_allyears.Rdata")
 mcmc_spat=mcmc_all
 linpred_spat=summarize_results(mcmc_spat,amax_data,fit_type="full_spatial",include_tau=1)
+linpred_spat_notau=summarize_results(mcmc_spat,amax_data,fit_type="full_spatial",include_tau=0)
+
 #---------------------------------------------------------------------------------------------------#
 
 for(locind in 1:12){
@@ -256,6 +269,10 @@ for(locind in 1:12){
 par(mfrow=c(1,3),cex.axis=1.5,cex.lab=1.5,cex.main=1.5)
 for(locind in 1:12){
   targlon=uniquelocs$lon[locind]; targlat=uniquelocs$lat[locind]
+  thisloc_data=amax_data[lon==targlon & lat==targlat,.(y)]
+    
+  thisloc_data[,gposition:=lapply(.SD,function(x) 1/(1-gringorten(x))), .SDcols = "y"]
+  
   
   #temporal:
   params_temp=calculate_parameters_clim(linpred_temp0,targlon=targlon,targlat=targlat)
@@ -271,14 +288,15 @@ for(locind in 1:12){
   
   #---Gev distributions----------#
   this_retper=c(2,5,10,20,25,30,40,50,60,70,80,90,100)
-  retper_temp=t(apply(params_spat[1:90001,],1,gevwrap,retper=this_retper))
-  retper_spat=t(apply(params_temp[1:90001,],1,gevwrap,retper=this_retper))
+  retper_temp=t(apply(params_temp[1:90001,],1,gevwrap,retper=this_retper))
+  retper_spat=t(apply(params_spat[1:90001,],1,gevwrap,retper=this_retper))
   retper_freq=gevwrap(freqres[locind,],retper=this_retper)
   
-  retper_median_temp=apply(retper_temp,2,quantile,probs=c(0.05,0.5,0.95))
-  retper_median_spat=apply(retper_spat,2,quantile,probs=c(0.05,0.5,0.95))
+  retper_median_temp=apply(retper_temp,2,quantile,probs=c(0.1,0.5,0.9))
+  retper_median_spat=apply(retper_spat,2,quantile,probs=c(0.1,0.5,0.9))
   
   plot(this_retper,retper_median_temp[2,],type="o",col="darkblue",ylim=c(0,100),xlab="Return period",ylab="Return level (mm)");grid()
+  points(thisloc_data$gposition,thisloc_data$y,col="black")
   lines(this_retper,retper_median_temp[1,],lty=2,col="darkblue")
   lines(this_retper,retper_median_temp[3,],lty=2,col="darkblue")
   lines(this_retper,retper_freq,col="orange",type="o")
@@ -287,6 +305,7 @@ for(locind in 1:12){
   lines(this_retper,retper_median_spat[1,],lty=2,col="red")
   lines(this_retper,retper_median_spat[3,],lty=2,col="red")
   title(locind)
+  
 
 }
 
@@ -306,4 +325,24 @@ colnames(coef_mu)=colnames(coef_kappa)=colnames(coef_xi)=mcmc_temp$covariates
 coef_mu
 coef_kappa
 coef_xi
+
+prob_inc_mu
+prob_inc_kappa
+prob_inc_xi
 #------------------------------#
+
+burnin=10000;N=100000
+plot(mcmc_temp$THETA[1:100000,3,3],type="l")
+
+#----------------------------#
+#look at tau:
+locind=2
+amax_data=fread(file="scripts/dev_I4C/Data/AM60_cov.csv")[lon<7&lat<62 & lat>58 & year>=1972 & year<=2015] 
+amax_data[,N:=.N,.(lon,lat)]
+ind=amax_data[,which(lon==uniquelocs$lon[locind] & lat==uniquelocs$lat[locind]),]
+
+for(j in ind){
+  print(quantile(mcmc_temp$TAU[,j,1]))
+}
+
+#looks reasonable.

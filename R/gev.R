@@ -1076,6 +1076,17 @@ gp.like.lambda <- function(lambda, alpha, tau, D)
 gev.init <- function(Y.list, X.all,S, prior.user, full, fixed.xi,nonspatial, log.kappa, xi.constrain,temporal=FALSE)
   {
 
+  #G <- gev.init(Y.list,
+  #X.all,
+  #S,
+  #prior.user,
+  #full,
+  #fixed.xi,
+  #nonspatial,
+  #log.kappa,
+  #xi.constraint,temporal=temporal) 
+  
+  
   
     ## I literally have no idea how this function got so long.
     G <- NULL
@@ -1765,6 +1776,7 @@ spatial.gev.bma <- function(Y.list,
                             log.kappa=FALSE,
                             xi.constraint = c(-Inf,Inf),temporal=FALSE)
   {
+
     ##---- Oh R --
     S <- as.matrix(S)
     ##-------------

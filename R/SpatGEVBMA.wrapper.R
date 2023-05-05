@@ -341,7 +341,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   ##prior$xi$Omega.0 <- diag(p)##solve(diag(c(100,rep(100,dim(X.all)[2] - 1))))
   
   set.seed(seed)
-  R0 <- spatial.gev.bma(StationData$Y.list, StationData$X, as.matrix(StationData$S), mcmc.reps, prior, print.every = 1e2, fixed.xi = fixed.xi, xi.constrain = xi.constrain)
+  R0 <- spatial.gev.bma(StationData$Y.list, StationData$X, as.matrix(StationData$S), mcmc.reps, prior, print.every = 1e2, fixed.xi = fixed.xi, xi.constraint = xi.constrain)
 
   save(R0, file=paste(output.folder,"/mcmc.RData",sep=""))
   R <- R0  
