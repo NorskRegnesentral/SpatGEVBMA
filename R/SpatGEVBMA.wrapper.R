@@ -341,7 +341,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   ##prior$xi$Omega.0 <- diag(p)##solve(diag(c(100,rep(100,dim(X.all)[2] - 1))))
   
   set.seed(seed)
-  R0 <- spatial.gev.bma(StationData$Y.list, StationData$X, as.matrix(StationData$S), mcmc.reps, prior, print.every = 1e2, fixed.xi = fixed.xi, xi.constraint = xi.constrain)
+  R0 <- spatial.gev.bma(StationData$Y.list, StationData$X, as.matrix(StationData$S), mcmc.reps, prior, print.every = 1000, fixed.xi = fixed.xi, xi.constraint = xi.constrain)
 
   save(R0, file=paste(output.folder,"/mcmc.RData",sep=""))
   R <- R0  
@@ -387,6 +387,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
     }
   
   cat("\nCheckpoint 3: Finished running spatial.gev.bma.\n\n")
+  
   
   ## Checkpoint 3
   
@@ -811,7 +812,7 @@ gev.impute.params <- function (R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau
     tau.new <- rnorm(1, tau.hat, sd = sqrt(varsigma))
     
     kappa.hat <- KAPPA[i]
-    kappa.s <- rtnorm(1, kappa.hat + tau.hat, sd = sqrt(varsigma),lower = 0)
+    kappa.s <- rtnorm(1, kappa.hat + tau.hat, sd = sqrt(varsigma))#,lower = 0)
     
     alpha <- R$ALPHA[it, 3]
     lambda <- R$LAMBDA[it, 3]
@@ -823,7 +824,7 @@ gev.impute.params <- function (R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau
     tau.new <- rnorm(1, tau.hat, sd = sqrt(varsigma))
     
     xi.s <- XI[i] + tau.new
-    xi.s = xi.s * (xi.s > xi.constrain[1] & xi.s < xi.constrain[2]) + xi.constrain[1] * (xi.s <= xi.constrain[1]) + xi.constrain[2] * (xi.s >= xi.constrain[2])
+    xi.s = xi.s * (xi.s > xi.constrain[1] & xi.s < xi.constrain[2]) #+ xi.constrain[1] * (xi.s <= xi.constrain[1]) + xi.constrain[2] * (xi.s >= xi.constrain[2])
     P[i,] <- c(mu.s, kappa.s, xi.s)
   }
   return(P)
