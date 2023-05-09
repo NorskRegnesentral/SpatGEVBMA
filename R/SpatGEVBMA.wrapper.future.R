@@ -1,12 +1,8 @@
-# To do:
 SpatGEVBMA.wrapper.prediction <- function(mcmc.res, #results file from .inference function.
                                          covariates.folder, # Path to folder with covariate files in netcdf-format (see above) 
-                                         station.annualMax.file, # File name of spreadsheet annualMax file (see above)
-                                         station.annualMax.sheet = 1, # The sheet name or index containing the station annualMax to be read (exactly 1 number)
-                                         station.locations.file, # File name of table formatted textfile including the spatial locations of the stations 
                                          output.path = getwd(),  # Path to the where the result folder should be stored
-                                         output.folder.name = "SpatGEVBMA.res",  # Name of result folder
-                                         return.period = 20,  # Return period to impute results for (single number or a vector of numbers)
+                                         output.folder.name = "SpatGEVBMA.predictions",  # Name of result folder
+                                         return.period = c(2,5,10,20,25,50,100,200),  # Return period to impute results for (single number or a vector of numbers)
                                          post.quantiles = c(0.025,0.5,0.975),  # Vector of quantiles for which the posterior should be evaluated
                                          show.uncertainty = TRUE,  # Logical indicating whether an IQR uncertainty plot should also be provided
                                          coordinate.type = "XY", # Character indicating the type/name of coordinate system being used, either "XY" or "LatLon" (see above)
@@ -22,7 +18,96 @@ SpatGEVBMA.wrapper.prediction <- function(mcmc.res, #results file from .inferenc
                                          fixed.xi = NULL,  # Where we want the shape parameter fixed
                                          xi.constrain = c(-Inf,Inf))
 {
+  if (show.uncertainty)
+  {
+    all.post.quantiles <- c(post.quantiles,c(0.25,0.75))   # The use of sort and unique here messes up things below, so avoid using it.
+  }
+  
+  initial.ls <- ls()  # To be used to subtract globally specified variables when saving intermediate variables
+  input.list <- names(formals(SpatGEVBMA.wrapper)) # Want to keep the input variables
+  
+  
+  ## Reading in grid covariates
+  cov.files <- list.files(covariates.folder,pattern = "*.nc")
+  cov.files.path <- list.files(covariates.folder,pattern = "*.nc",full.names=TRUE)
+  
+  a <- list()
+  nm <- NULL
+  for(i in 1:length(cov.files))
+  {
+    a0 <-   nc_open(cov.files.path[i]) 
+    a[[i]] <- list()
+    if (coordinate.type=="XY")
+    {
+      a[[i]]$x <- a0$dim$X$vals
+      a[[i]]$y <- a0$dim$Y$vals
+    }
+    
+    if (coordinate.type=="LatLon")
+    {
+      a[[i]]$x <- a0$dim$Lon$vals
+      a[[i]]$y <- a0$dim$Lat$vals
+    }
+    ## Sorting the variables such that the appear in increasing coordinate order (fields default)
+    order.y <- length(a[[i]]$y):1
+    a[[i]]$y <- a[[i]]$y[order.y]
+    
+    a[[i]]$z <- ncvar_get(a0)[,order.y]
+    nc_close(a0)
+    nm[i] <- strsplit(cov.files[i],".",fixed=TRUE)[[1]][1]
+    
+    cat(paste("Finished reading ",i," of ",length(cov.files)," covariate files.\n",sep=""))
+  }
+  
+  indX <- a[[1]]$x
+  indY <- a[[1]]$y
+  
+  nx <- length(indX)
+  ny <- length(indY)
+  
+  allX <- rep(indX,times=ny)
+  allY <- rep(indY,each=nx)
+  
+  allZ <- NULL
+  b <- a
+  for (i in 1:length(cov.files))
+  {
+    z.vec <- c(a[[i]]$z)
+    mu.z.vec <- mean(z.vec, na.rm=TRUE)
+    sd.z.vec <- sd(z.vec,na.rm=TRUE)  
+    stand.z.vec <- (z.vec-mu.z.vec)/sd.z.vec
+    allZ <- cbind(allZ,stand.z.vec)
+    b[[i]]$z <- matrix(stand.z.vec,ncol=ny)
+  }
+  
+  gridData <- list()
+  gridData$coordinates <- data.frame(x=allX,y=allY)
+  gridData$covariates <- as.data.frame(allZ)
+  colnames(gridData$covariates) <- nm
+  gridData$n <- length(allX)
+  n <- gridData$n
+  
+  gridDataList <- b
+  names(gridDataList) <- nm
+  
+  ## Deleting ununsed large objects
+  rm(a,b)
+  
+  cat("\nCheckpoint 1: Finished structuring of covariate grid.\n")
+  
+  
+  
   ## Checkpoint 3
+  R=mcmc.res
+  ## Removing burn-in
+  R$THETA <- R$THETA[-(1:burn.in),,]
+  R$TAU <- R$TAU[-(1:burn.in),,]
+  R$ALPHA <- R$ALPHA[-(1:burn.in),]
+  R$M <- R$M[-(1:burn.in),,]
+  R$LAMBDA <- R$LAMBDA[-(1:burn.in),]
+  R$ACCEPT.TAU <- R$ACCEPT.TAU[-(1:burn.in),,]
+  #---------------------------------------------#
+  
   
   ## Mapping posterior to grid
   
@@ -86,8 +171,7 @@ SpatGEVBMA.wrapper.prediction <- function(mcmc.res, #results file from .inferenc
   }
   
   ## Saving intermediate values to easily continue from here if bugs occurs
-  if (create.tempfiles)
-  {
+  if (create.tempfiles){
     current.ls <- ls()
     keep.var <- unique(c(current.ls[!(current.ls %in% initial.ls)],input.list))
     save(list=keep.var,file=file.path(output.temp.folder,"temp_checkpoint_4.RData")) 
@@ -136,15 +220,15 @@ SpatGEVBMA.wrapper.prediction <- function(mcmc.res, #results file from .inferenc
     XYGrid <- as.matrix(round(convUL(allLL, km=FALSE), digits=0))
     
     # Transform the S matrix to LatLon as well
+    #S.new <- cbind(X=S[,1],Y=S[,2])
     
-    S.new <- cbind(X=S[,1],Y=S[,2])
-    
-    attr(S.new, "projection") <- "UTM"
-    attr(S.new, "zone") <- UTM.zone
+    #attr(S.new, "projection") <- "UTM"
+    #attr(S.new, "zone") <- UTM.zone
     
     #Compute LL coordinates
-    S <- as.matrix(round(convUL(S.new, km=FALSE), digits=4))
+    #S <- as.matrix(round(convUL(S.new, km=FALSE), digits=4))
     
+    S=R0$S
   }
   
   ## Writing final results to netcdf-file and image plots
@@ -322,7 +406,6 @@ SpatGEVBMA.wrapper.prediction <- function(mcmc.res, #results file from .inferenc
   cat("\nFunction run complete!\n")
   # Function completed!
   
-
 }
 
 
