@@ -2,6 +2,7 @@
 
 export(A)
 export(SpatGEVBMA.wrapper.prediction)
+export(SpatGEVBMA.wrapper)
 export(spatial.gev.bma)
 export(dmvnorm)
 export(f.double.prime)

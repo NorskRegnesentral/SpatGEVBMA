@@ -26,6 +26,28 @@ SpatGEVBMA.wrapper.prediction <- function(mcmc.res, #results file from .inferenc
   initial.ls <- ls()  # To be used to subtract globally specified variables when saving intermediate variables
   input.list <- names(formals(SpatGEVBMA.wrapper)) # Want to keep the input variables
   
+  output.folder <- file.path(output.path,output.folder.name)
+  output.temp.folder <- file.path(output.path,output.folder.name,"Temp")
+  
+  ## Checks if output directory exists, if not it creates it  
+  dirs <- list.dirs(output.path,full.name=FALSE,recursive=FALSE)
+  if (!(output.folder.name %in% dirs))
+  {
+    dir.create(output.folder)
+  }
+  
+
+  
+  ## The same with the Temp folder 
+  dirs0 <- list.dirs(output.folder,full.name=FALSE,recursive=FALSE)
+  if (!("Temp" %in% dirs0))
+  {
+    dir.create(output.temp.folder)
+  }
+  input.list <- names(formals(SpatGEVBMA.wrapper.prediction)) # Want to keep the input variables
+  
+  ## Saving the input variables
+  save(list=input.list,file=file.path(output.folder,"input_var.RData"))
   
   ## Reading in grid covariates
   cov.files <- list.files(covariates.folder,pattern = "*.nc")
@@ -99,6 +121,7 @@ SpatGEVBMA.wrapper.prediction <- function(mcmc.res, #results file from .inferenc
   
   ## Checkpoint 3
   R=mcmc.res
+  S=R$S
   ## Removing burn-in
   R$THETA <- R$THETA[-(1:burn.in),,]
   R$TAU <- R$TAU[-(1:burn.in),,]
@@ -228,8 +251,10 @@ SpatGEVBMA.wrapper.prediction <- function(mcmc.res, #results file from .inferenc
     #Compute LL coordinates
     #S <- as.matrix(round(convUL(S.new, km=FALSE), digits=4))
     
-    S=R0$S
+    
   }
+  
+ 
   
   ## Writing final results to netcdf-file and image plots
   

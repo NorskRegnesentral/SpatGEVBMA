@@ -38,10 +38,11 @@ xi.constrain = c(-Inf,Inf)
 testing=FALSE
 burn.in <- 4*10^4
 coordinate.type="XY"
+transform.output = "UTM_33_to_LatLon"
 
 SpatGEVBMA.wrapper.prediction(mcmc.res, #results file from .inference function.
                               covariates.folder, # Path to folder with covariate files in netcdf-format (see above) 
-                              output.path = getwd(),  # Path to the where the result folder should be stored
+                              output.path =output.path,  # Path to the where the result folder should be stored
                               output.folder.name = output.folder.name,  # Name of result folder
                               return.period =return.period,  # Return period to impute results for (single number or a vector of numbers)
                               post.quantiles = post.quantiles,  # Vector of quantiles for which the posterior should be evaluated
@@ -49,7 +50,7 @@ SpatGEVBMA.wrapper.prediction(mcmc.res, #results file from .inference function.
                               coordinate.type = coordinate.type, # Character indicating the type/name of coordinate system being used, either "XY" or "LatLon" (see above)
                               transform.output = transform.output, # Character specifying whether and how the output should be transformed. NULL corresponds to no transformation. "UTM_QQ_to_LatLon" transforms from UTM QQ (insert number) to LatLon
                               burn.in = burn.in, # The length of the initial burn-in period which is removed
-                              cores = 1, # The number of cores on the computer used for the imputation. Using detectCores()-1 is good for running on a laptop.
+                              cores = 16, # The number of cores on the computer used for the imputation. Using detectCores()-1 is good for running on a laptop.
                               annualMax.name = annualMax.name, # Name of annualMax data used in output plots and netcdf files. If NULL, then the name of the specified sheet is used.
                               create.tempfiles = create.tempfiles, # Logical indicating whether temporary files should be saved in a Temp folder to perform debugging and check intermediate variables/results if the function crashes
                               keep.temp.files = keep.temp.files, # Logical indicating whether the temporary files (if written) should be kept or deleted on function completion
