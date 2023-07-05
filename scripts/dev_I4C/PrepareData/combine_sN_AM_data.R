@@ -1,7 +1,7 @@
 library(data.table)
 setwd("/nr/samba/user/roksvag/GitRepo/SpatGEVBMA/scripts/dev_I4C/")
 
-dur=24*60
+dur=1*60
 sN_cov1=fread("Data/sN_covariates/seasonal_weather_1965_1969.csv")
 sN_cov2=fread("Data/sN_covariates/seasonal_weather_1970_1979.csv")
 sN_cov3=fread("Data/sN_covariates/seasonal_weather_1980_1989.csv")

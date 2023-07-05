@@ -94,19 +94,19 @@ amax3=round(amax_data[,.(wetterdays_JJA,precip_JJA,lon,lat,temp_JJA,masl,y)],1)
 amax3[,precip_JJA:=precip_JJA/1000]
 amax3[,intercept:=1]
 
-formula = inla.mdata(y,amax3[,.(lat,lat)] ,amax3[,.(lat,lat)]) ~ -1 + intercept + wetterdays_JJA+precip_JJA+temp_JJA+masl+lon+lat
+formula = inla.mdata(y,amax3[,.(lon,lat)] ,amax3[,.(lon,lat)]) ~ -1 + intercept + wetterdays_JJA+precip_JJA+temp_JJA+masl
 
 
 r1 = inla(formula,
           family = "bgev",
-          data = amax2,
+          data = amax3,
           control.family = list(hyper = hyper.bgev,
                                 control.bgev = control.bgev),
           control.predictor = list(compute = TRUE),
           control.fixed = list(prec=1000),
           control.compute = list(cpo = TRUE),
           control.inla = list(int.strategy = "eb"),
-          verbose=FALSE, safe=TRUE)
+          verbose=TRUE)
 
 linpred=r1$summary.fixed$`0.5quant`
 hyperpar=r1$summary.hyperpar$`0.5quant`

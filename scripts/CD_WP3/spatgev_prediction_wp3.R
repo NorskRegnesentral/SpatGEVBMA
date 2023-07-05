@@ -4,7 +4,7 @@ library(fields)
 library(SpatGEVBMA)
 
 #------------------------------------------------------------------------------------#
-clim_years=2031:2060 #years we want to make predictions for. Possible values: 2021:2050, 2031:2060, 2041:2070, 2051:2080, 2061:2090, 2061:2100.
+clim_years=2071:2100 #years we want to make predictions for. Possible values: 2021:2050, 2031:2060, 2041:2070, 2051:2080, 2061:2090, 2061:2100.
 rcpnum=45 #rcp 26 or 45.
 duration=1440 #duration.
 #------------------------------------------------------------------------------------#

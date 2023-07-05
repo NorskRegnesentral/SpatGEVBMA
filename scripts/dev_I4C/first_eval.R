@@ -176,12 +176,7 @@ calculate_parameters_clim=function(linpred_res,targlon,targlat){
   return(list(mu=mu,kappa=kappa,xi=xi,lon=targlon,lat=targlat))
 }
 
-gringorten <- function(x) {
-  rank <- rank(x, na.last = "keep", ties.method = "first")
-  len <- sum(!is.na(x))
-  xx <- (rank - 0.44)/(len + 0.12)
-  return(xx)
-}
+
 
 
 
