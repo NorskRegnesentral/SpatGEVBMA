@@ -4,15 +4,15 @@ library(fields)
 library(SpatGEVBMA)
 
 #------------------------------------------------------------------------------------#
-clim_years=2071:2100 #years we want to make predictions for. Possible values: 2021:2050, 2031:2060, 2041:2070, 2051:2080, 2061:2090, 2061:2100.
+clim_years=2021:2050 #years we want to make predictions for. Possible values: 2021:2050, 2031:2060, 2041:2070, 2051:2080, 2061:2090, 2061:2100.
 rcpnum=45 #rcp 26 or 45.
-duration=1440 #duration.
+duration=60 #duration.
 #------------------------------------------------------------------------------------#
 
 data_wd="/nr/project/stat/ClimDesign/WP3/"
 
 # Take out parameter values from this file (mcmc run for rcpnum and duration):
-load(paste0("/nr/project/stat/ClimDesign/WP3/Res/rcp",rcpnum,"/res_",duration,"min_rcp",rcpnum,"/mcmc.RData"))
+load(paste0("/nr/project/stat/ClimDesign/WP3/Res/rcp",rcpnum,"/inference/res_",duration,"min_rcp",rcpnum,"/mcmc.RData"))
 mcmc.res=R0
 
 #Take out covariates from this file (rcpnum and according to the first clim_year):
@@ -39,6 +39,13 @@ testing=FALSE
 burn.in <- 4*10^4
 coordinate.type="XY"
 transform.output = "UTM_33_to_LatLon"
+seed=123
+xi.constrain=c(-Inf,Inf)
+cores=16
+
+specify_standard=TRUE
+#mcmc.res$standardizing_info #means that we use info from here for post-processing.
+
 
 SpatGEVBMA.wrapper.prediction(mcmc.res, #results file from .inference function.
                               covariates.folder, # Path to folder with covariate files in netcdf-format (see above) 
@@ -58,6 +65,7 @@ SpatGEVBMA.wrapper.prediction(mcmc.res, #results file from .inference function.
                               testing = testing, # Variable indicating whether the run is a test or not. FALSE indicates no testing, a positive number indicates the number of locations being imputed
                               seed = 123, # The seed used in the mcmc computations
                               fixed.xi = fixed.xi,  # Where we want the shape parameter fixed
-                              xi.constrain =xi.constrain)
+                              xi.constrain =xi.constrain,
+                              specify_standard=specify_standard)
 
 #------------------------------------------------------------------------------------------------------------------#

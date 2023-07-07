@@ -16,7 +16,7 @@ SpatGEVBMA.wrapper.prediction <- function(mcmc.res, #results file from .inferenc
                                          testing = FALSE, # Variable indicating whether the run is a test or not. FALSE indicates no testing, a positive number indicates the number of locations being imputed
                                          seed = 123, # The seed used in the mcmc computations
                                          fixed.xi = NULL,  # Where we want the shape parameter fixed
-                                         xi.constrain = c(-Inf,Inf))
+                                         xi.constrain = c(-Inf,Inf),specify_standard=FALSE)
 {
   if (show.uncertainty)
   {
@@ -37,7 +37,6 @@ SpatGEVBMA.wrapper.prediction <- function(mcmc.res, #results file from .inferenc
   }
   
 
-  
   ## The same with the Temp folder 
   dirs0 <- list.dirs(output.folder,full.name=FALSE,recursive=FALSE)
   if (!("Temp" %in% dirs0))
@@ -92,11 +91,23 @@ SpatGEVBMA.wrapper.prediction <- function(mcmc.res, #results file from .inferenc
   
   allZ <- NULL
   b <- a
-  for (i in 1:length(cov.files))
+  for (i in 1:length(cov.files)) #change this to standardize wrt reference period.
   {
     z.vec <- c(a[[i]]$z)
+    
+    if(specify_standard==FALSE){
+      
     mu.z.vec <- mean(z.vec, na.rm=TRUE)
-    sd.z.vec <- sd(z.vec,na.rm=TRUE)  
+    sd.z.vec <- sd(z.vec,na.rm=TRUE)
+    
+    }else{
+      
+    mu.z.vec=mcmc.res$standardizing_info$covariate_base_mean[i]
+    sd.z.vec=mcmc.res$standardizing_info$covariate_base_sd[i]
+    
+    }
+    
+    
     stand.z.vec <- (z.vec-mu.z.vec)/sd.z.vec
     allZ <- cbind(allZ,stand.z.vec)
     b[[i]]$z <- matrix(stand.z.vec,ncol=ny)

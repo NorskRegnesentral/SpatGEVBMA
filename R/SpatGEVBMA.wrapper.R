@@ -147,6 +147,8 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   
   allZ <- NULL
   b <- a
+  musave=c()
+  sdsave=c()
   for (i in 1:length(cov.files))
     {
       z.vec <- c(a[[i]]$z)
@@ -155,7 +157,14 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
       stand.z.vec <- (z.vec-mu.z.vec)/sd.z.vec
       allZ <- cbind(allZ,stand.z.vec)
       b[[i]]$z <- matrix(stand.z.vec,ncol=ny)
-    }
+      
+      musave[i]=mu.z.vec
+      sdsave[i]=sd.z.vec
+  }
+  covsave=cov.files
+  
+  
+  
   
   gridData <- list()
   gridData$coordinates <- data.frame(x=allX,y=allY)
@@ -170,6 +179,9 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   # Saving also the data on the original list format
   gridDataList <- b
   names(gridDataList) <- nm
+  
+  base_climate=list(covariate_base_mean=musave,covariate_base_sd=sdsave,covariate_names=nm,gridDataList=gridDataList)
+  
   
   ## Deleting ununsed large objects
   rm(a,b)
@@ -214,7 +226,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
     { ## Assuming the first column of the Ydata file contains the year
       ## Extracting Ys
       Y.list[[j]] <- c(na.omit(dat[,j]))  # Removing NAs and ignoring the observation year
-      if (length(Y.list[[j]]) < 10)
+      if (length(Y.list[[j]]) < 5)
         {
           remove.station[j] = TRUE  # Removes the station if there are less than 10 observations in it
           cat(paste("\nStation ",stations[j]," has only ",length(Y.list[[j]]), " observation(s), and is therefore removed.\n",sep=""))
@@ -242,12 +254,26 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   
   for (j in 1:nS)
     {
-      thisStation <- which(SData.use$Stnr==stations[j])
+      thisStation <- which(SData.use$Stnr==stations[j])[1]
       S[j,1] <- SData.use$x[thisStation]
       S[j,2] <- SData.use$y[thisStation]
     }
   colnames(S) <- c("x","y")
 
+  
+  ind_na=which(is.na(S[,1])==TRUE)
+  
+  if(length(ind_na)>0){
+    for(j in 1:length(ind_na)){
+      Y.list[[ind_na[j]]]=NULL
+    }
+    S=S[-ind_na,]
+    stations=stations[-ind_na]
+    nS=length(stations)
+  }
+
+  
+  
   ## Extracting X
   # Basic function to be used to pick the closest value when interpolation gives NA values
   get.nn <- function(data, labels, query)
@@ -255,7 +281,7 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
       nns <- get.knnx(data, query, k=1)
       labels[nns$nn.index]
     }
-  
+
   nX=length(gridDataList)
   X = matrix(NA,ncol=nX,nrow=nS)
   for (j in 1:(nX))
@@ -341,8 +367,10 @@ SpatGEVBMA.wrapper <- function(covariates.folder, # Path to folder with covariat
   ##prior$xi$Omega.0 <- diag(p)##solve(diag(c(100,rep(100,dim(X.all)[2] - 1))))
   
   set.seed(seed)
-  R0 <- spatial.gev.bma(StationData$Y.list, StationData$X, as.matrix(StationData$S), mcmc.reps, prior, print.every = 1000, fixed.xi = fixed.xi, xi.constraint = xi.constrain)
-
+  R0 <- spatial.gev.bma(StationData$Y.list, StationData$X, as.matrix(StationData$S), mcmc.reps, prior, print.every = 100, fixed.xi = fixed.xi, xi.constraint = xi.constrain)
+  
+  R0$standardizing_info=base_climate
+  
   save(R0, file=paste(output.folder,"/mcmc.RData",sep=""))
   R <- R0  
   
@@ -850,6 +878,7 @@ gev.impute.params <- function (R, X.drop, S.drop, sigma.22.inv, sigma.22.inv.tau
 imputation.func <- function(i,cov.map,S.map,R,sigma.22.inv,sigma.22.inv.tau,return.period,all.post.quantiles,N,xi.constrain=c(-Inf,Inf))
 {
 
+  
   n.return <- length(return.period)
   n.q <- length(all.post.quantiles)
   Q <- matrix(NA,n.return, n.q)

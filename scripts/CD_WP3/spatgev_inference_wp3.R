@@ -2,12 +2,13 @@ rm(list=ls())
 library(ncdf4);library(Thermimage)
 library(fields)
 library(SpatGEVBMA)
+#source("/nr/samba/user/roksvag/GitRepo/SpatGEVBMA/scripts/CD_WP3/spatgev_inference_wp3.R")
 
 #------------------------------------------------------------------------------------#
 
-clim_years=1991:2020 #1991:2020,#1971:2022 (clim 2)
+clim_years=1967:2022 #1991:2020,#1971:2022 (clim 2)
 rcpnum=45
-duration=10
+duration=180
 
 #------------------------------------------------------------------------------------#
 
@@ -18,9 +19,9 @@ station.annualMax.sheet <- durtable[dur==duration,sheet]
 data_wd="/nr/project/stat/ClimDesign/WP3/"
 output.folder.name <- paste0("res_",duration,"min","_rcp",rcpnum)
 
-output.path <- paste0("/nr/project/stat/ClimDesign/WP3/Res/rcp",rcpnum,"/")
+output.path <- paste0("/nr/project/stat/ClimDesign/WP3/Res/rcp",rcpnum,"/inference/")
 covariates.folder <- paste0("/nr/project/stat/ClimDesign/WP3/Data/fromOskar/inference/rcp",rcpnum,"/",clim_years[1],"/")
-station.annualMax.file <- "/nr/project/stat/ClimDesign/WP3/Data/fromOskar/obs/AM_final.xlsx"
+station.annualMax.file <- "/nr/project/stat/ClimDesign/WP3/Data/fromAnita/obs/AM_all_2023.xlsx"
 return.period <- c(2,5,10,20,25,50,100,200)
 post.quantiles <- c(0.025,0.5,0.975)
 show.uncertainty <- TRUE
@@ -38,7 +39,7 @@ transform.output = "UTM_33_to_LatLon"
 fixed.xi = NULL
 
 
-station.locations.file <- "/nr/project/stat/ClimDesign/WP3//Data/fromOskar/meta/metadata_new.txt"
+station.locations.file <- "/nr/project/stat/ClimDesign/WP3//Data/fromAnita/meta/metadata_new.txt"
 
 SpatGEVBMA.wrapper(covariates.folder = covariates.folder,
                    station.annualMax.file = station.annualMax.file,
