@@ -7,8 +7,8 @@ setwd("/nr/project/stat/ClimDesign/WP3/Data/fromOskar/")
 
 
 #1991:2020, 2021:2050, 2031:2060, 2041:2070, 2051:2080, 2061:2090, 2071:2100.
-clim_years=2071:2022 #1991:2020,#1971:2022 (clim 2)
-rcpnum=26
+clim_years=2041:2070 #1991:2020,#1971:2022 (clim 2)
+rcpnum=45
 type="prediction"
 
 climlist=list()
@@ -44,7 +44,7 @@ for(type in c("prediction","inference")){
     
     nc=nc_open(paste0("raw/rcp",rcpnum,"/cnrm-r1i1p1-aladin_rcp",rcpnum,"_eqm-sn2018v2005_rawbc_norway_1km_tas_daily_1960-2100.JJAtemp.nc4"))
     lon=ncvar_get(nc,"lon")
-    lat=ncvar_get(nc,"lon")
+    lat=ncvar_get(nc,"lat")
     Xc=ncvar_get(nc,"Xc")
     Yc=ncvar_get(nc,"Yc")
     var=ncvar_get(nc,"tas")
@@ -72,7 +72,7 @@ for(type in c("prediction","inference")){
     #MAP temp:
     nc=nc_open(paste0("raw/rcp",rcpnum,"/cnrm-r1i1p1-aladin_rcp",rcpnum,"_eqm-sn2018v2005_rawbc_norway_1km_pr_daily_1960-2100.MAP.nc4"))
     lon=ncvar_get(nc,"lon")
-    lat=ncvar_get(nc,"lon")
+    lat=ncvar_get(nc,"lat")
     Xc=ncvar_get(nc,"Xc")
     Yc=ncvar_get(nc,"Yc")
     var=ncvar_get(nc,"MAP")
@@ -103,7 +103,7 @@ for(type in c("prediction","inference")){
     #MSP temp:
     nc=nc_open(paste0("raw/rcp",rcpnum,"/cnrm-r1i1p1-aladin_rcp",rcpnum,"_eqm-sn2018v2005_rawbc_norway_1km_pr_daily_1960-2100.MSP.nc4"))
     lon=ncvar_get(nc,"lon")
-    lat=ncvar_get(nc,"lon")
+    lat=ncvar_get(nc,"lat")
     Xc=ncvar_get(nc,"Xc")
     Yc=ncvar_get(nc,"Yc")
     var=ncvar_get(nc,"MSP")
@@ -135,7 +135,7 @@ for(type in c("prediction","inference")){
     #JJA precip:
     nc=nc_open(paste0("raw/rcp",rcpnum,"/cnrm-r1i1p1-aladin_rcp",rcpnum,"_eqm-sn2018v2005_rawbc_norway_1km_pr_daily_1960-2100.MSPJJA.nc4"))
     lon=ncvar_get(nc,"lon")
-    lat=ncvar_get(nc,"lon")
+    lat=ncvar_get(nc,"lat")
     Xc=ncvar_get(nc,"Xc")
     Yc=ncvar_get(nc,"Yc")
     var=ncvar_get(nc,"MSPJJA")
@@ -167,7 +167,7 @@ for(type in c("prediction","inference")){
     #wetDays:
     nc=nc_open(paste0("raw/rcp",rcpnum,"/cnrm-r1i1p1-aladin_rcp",rcpnum,"_eqm-sn2018v2005_rawbc_norway_1km_pr_daily_1960-2100.wetDays.nc4"))
     lon=ncvar_get(nc,"lon")
-    lat=ncvar_get(nc,"lon")
+    lat=ncvar_get(nc,"lat")
     Xc=ncvar_get(nc,"Xc")
     Yc=ncvar_get(nc,"Yc")
     var=ncvar_get(nc,"wetDays")

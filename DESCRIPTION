@@ -17,8 +17,8 @@ Depends: msm,
 	 PBSmapping,
 	 data.table
 Imports: Rcpp (>= 0.11.0)
-LinkingTo: Rcpp
+LinkingTo: Rcpp, RcppArmadillo
 Maintainer: Alex Lenkoski <alex@nr.no>
 Description: This package fits a hierarchical spatial model for the generalized extreme value distribution with the option of model averaging over the space of covariates.
 License: GPL
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3

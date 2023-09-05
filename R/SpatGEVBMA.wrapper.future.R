@@ -96,15 +96,12 @@ SpatGEVBMA.wrapper.prediction <- function(mcmc.res, #results file from .inferenc
     z.vec <- c(a[[i]]$z)
     
     if(specify_standard==FALSE){
-      
-    mu.z.vec <- mean(z.vec, na.rm=TRUE)
-    sd.z.vec <- sd(z.vec,na.rm=TRUE)
-    
+      mu.z.vec <- mean(z.vec, na.rm=TRUE)
+      sd.z.vec <- sd(z.vec,na.rm=TRUE)
     }else{
-      
-    mu.z.vec=mcmc.res$standardizing_info$covariate_base_mean[i]
-    sd.z.vec=mcmc.res$standardizing_info$covariate_base_sd[i]
-    
+      print("Using pre-computed standardization.")
+      mu.z.vec=mcmc.res$standardizing_info$covariate_base_mean[i]
+      sd.z.vec=mcmc.res$standardizing_info$covariate_base_sd[i]
     }
     
     

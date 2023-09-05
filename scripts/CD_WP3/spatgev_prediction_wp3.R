@@ -4,9 +4,9 @@ library(fields)
 library(SpatGEVBMA)
 
 #------------------------------------------------------------------------------------#
-clim_years=2021:2050 #years we want to make predictions for. Possible values: 2021:2050, 2031:2060, 2041:2070, 2051:2080, 2061:2090, 2061:2100.
+clim_years=2041:2070 #years we want to make predictions for. Possible values: 1991:2020, 2021:2050, 2031:2060, 2041:2070, 2051:2080, 2061:2090, 2061:2100.
 rcpnum=45 #rcp 26 or 45.
-duration=60 #duration.
+duration=10 #duration.
 #------------------------------------------------------------------------------------#
 
 data_wd="/nr/project/stat/ClimDesign/WP3/"
