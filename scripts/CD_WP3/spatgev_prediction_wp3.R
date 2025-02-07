@@ -4,9 +4,9 @@ library(fields)
 library(SpatGEVBMA)
 
 #------------------------------------------------------------------------------------#
-clim_years=2071:2100 #years we want to make predictions for. Possible values: 1991:2020, 2021:2050, 2031:2060, 2041:2070, 2051:2080, 2061:2090, 2071:2100.
+clim_years=1991:2020 #years we want to make predictions for. Possible values: 1991:2020, 2021:2050, 2031:2060, 2041:2070, 2051:2080, 2061:2090, 2071:2100.
 rcpnum=45 #rcp 26 or 45.
-duration=10  #duration.
+duration=180  #duration.
 #------------------------------------------------------------------------------------#
 
 data_wd="/nr/project/stat/ClimDesign/WP3/"
@@ -22,8 +22,6 @@ covariates.folder <- paste0("/nr/project/stat/ClimDesign/WP3/Data/fromOskar/pred
 #Where to save the results:
 output.path <- paste0("/nr/project/stat/ClimDesign/WP3/Res/rcp",rcpnum,"/prediction/",clim_years[1],"/")
 output.folder.name <- paste0("res_",duration,"min","_rcp",rcpnum)
-
-
 
 return.period = c(2,5,10,20,25,50,100,200)
 post.quantiles = c(0.025,0.5,0.975)
